@@ -268,7 +268,25 @@ openapi-to-mcp examples/hello.yaml --output results/my-api-evaluation.json
 
 ## Testing with Stub Server
 
-To test the generated MCP server with a stub backend, follow these steps:
+This repository includes a complete end-to-end demonstration using the `examples/sample_api.yaml` specification. The sample API represents a fictional space mission control system with endpoints for spaceship telemetry, crew management, mission operations, and scientific experiments.
+
+To facilitate testing without a real backend, we provide:
+- A stub server (`examples/stub_server.py`) that implements the backend API with simulated responses
+- Pre-generated MCP server and client code for immediate testing
+- A complete workflow to test the entire chain from API specification to working MCP tools
+
+### Pre-Generated Results
+
+For convenience, we've included pre-generated results from evaluating `sample_api.yaml` in:
+```
+examples/results/anthropic/sample_api/
+```
+
+This directory contains evaluation reports, enhanced specifications, and a ready-to-run MCP server. See [RESULTS_GUIDE.md](docs/RESULTS_GUIDE.md) for detailed information about these files.
+
+### Running the End-to-End Demo
+
+Follow these steps to test the complete integration:
 
 ### Step 1: Start the Stub Server
 
@@ -295,7 +313,7 @@ In a new terminal, navigate to the generated MCP server directory and start it:
 
 ```bash
 # Navigate to the generated server directory
-cd results_*_sample_api_*/mcpserver/
+cd examples/results/anthropic/sample_api/mcpserver/
 
 # Start the MCP server on port 9001, pointing to stub server on port 9002
 python server.py --port 9001 --base-url http://localhost:9002
@@ -320,11 +338,11 @@ uv run examples/stub_server.py --port 9002
 
 # Terminal 2: Set auth and start MCP server
 export AUTH_TOKEN="my-secret-token"
-cd output/results_*_sample_api_*/mcpserver/
+cd examples/results/anthropic/sample_api/mcpserver/
 python server.py --port 9001 --base-url http://localhost:9002
 
 # Terminal 3: Run client
-cd output/results_*_sample_api_*/mcpserver/
+cd examples/results/anthropic/sample_api/mcpserver/
 python client.py --server-url http://localhost:9001/mcp
 ```
 
@@ -379,6 +397,21 @@ output/
         ├── README.md                         # Usage documentation
         └── tool_spec.txt                     # Tool specifications
 ```
+
+## Understanding the Results
+
+The OpenAPI to MCP Converter generates comprehensive evaluation reports and MCP implementations. To help you understand and work with these outputs:
+
+📖 **[View the Results Guide](docs/RESULTS_GUIDE.md)**
+
+This guide explains:
+- What each generated file contains and its purpose
+- How to interpret evaluation scores and quality metrics
+- Understanding pagination and filtering support indicators
+- Working with the generated MCP server and client code
+- Links to example files from our pre-generated sample API results
+
+The pre-generated results in `examples/results/anthropic/sample_api/` serve as a reference implementation showing what a high-quality conversion looks like.
 
 ## AI Providers
 
