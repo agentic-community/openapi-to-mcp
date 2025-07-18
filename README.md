@@ -179,12 +179,16 @@ uv pip install -e ".[dev]"
 
 Evaluate and convert a local OpenAPI specification:
 ```bash
-openapi-to-mcp my-api.yaml
+# For a simple example
+openapi-to-mcp examples/hello.yaml
+
+# For a more complex example
+openapi-to-mcp examples/sample_api.yaml
 ```
 
 Evaluate a specification from a URL:
 ```bash
-openapi-to-mcp --url https://api.example.com/openapi.json
+openapi-to-mcp --url https://raw.githubusercontent.com/agentic-community/openapi-to-mcp/refs/heads/main/examples/hello.yaml
 ```
 
 ### Command Line Options
@@ -225,27 +229,104 @@ Note: The model selection is configured in `config/config.yml`, not through envi
 ### Example 1: Evaluate a Simple API
 
 ```bash
-# Evaluate the example hello API
+# Evaluate the simple hello API example
 openapi-to-mcp examples/hello.yaml
 
 # Check the generated output
 ls output/results_*_hello/
 ```
 
-### Example 2: Evaluate Only (No Generation)
+### Example 2: Evaluate a Complex API
+
+```bash
+# Evaluate the more complex sample API with multiple endpoints
+openapi-to-mcp examples/sample_api.yaml
+
+# This example includes operations for users, products, and more
+```
+
+### Example 3: Evaluate from URL
+
+```bash
+# Evaluate directly from a URL
+openapi-to-mcp --url https://raw.githubusercontent.com/agentic-community/openapi-to-mcp/refs/heads/main/examples/hello.yaml
+```
+
+### Example 4: Evaluate Only (No Generation)
 
 ```bash
 # Just evaluate without generating MCP server
-openapi-to-mcp my-api.yaml --eval-only
+openapi-to-mcp examples/sample_api.yaml --eval-only
 ```
 
-### Example 3: Custom Output Location
+### Example 5: Custom Output Location
 
 ```bash
 # Specify custom output file
-openapi-to-mcp my-api.yaml --output results/my-api-evaluation.json
+openapi-to-mcp examples/hello.yaml --output results/my-api-evaluation.json
 ```
 
+## Testing with Stub Server
+
+To test the generated MCP server with a stub backend, follow these steps:
+
+### Step 1: Start the Stub Server
+
+First, run the stub server that simulates your API backend:
+
+```bash
+# Start stub server on port 9002
+uv run examples/stub_server.py --port 9002
+```
+
+This creates a mock backend that responds to API requests with simulated data.
+
+### Step 2: Set Authentication Token
+
+Export the authentication token required by the MCP server:
+
+```bash
+export AUTH_TOKEN="your-secret-token"
+```
+
+### Step 3: Start the MCP Server
+
+In a new terminal, navigate to the generated MCP server directory and start it:
+
+```bash
+# Navigate to the generated server directory
+cd results_*_sample_api_*/mcpserver/
+
+# Start the MCP server on port 9001, pointing to stub server on port 9002
+python server.py --port 9001 --base-url http://localhost:9002
+```
+
+### Step 4: Test with the MCP Client
+
+In another terminal, run the MCP client to interact with your server:
+
+```bash
+# From the same mcpserver directory
+python client.py --server-url http://localhost:9001/mcp
+```
+
+The client will connect to the MCP server and allow you to test all the available tools.
+
+### Example Workflow
+
+```bash
+# Terminal 1: Start stub server
+uv run examples/stub_server.py --port 9002
+
+# Terminal 2: Set auth and start MCP server
+export AUTH_TOKEN="my-secret-token"
+cd output/results_*_sample_api_*/mcpserver/
+python server.py --port 9001 --base-url http://localhost:9002
+
+# Terminal 3: Run client
+cd output/results_*_sample_api_*/mcpserver/
+python client.py --server-url http://localhost:9001/mcp
+```
 
 ## Configuration
 

@@ -54,8 +54,8 @@ def parse_arguments():
     parser.add_argument(
         "--port",
         type=str,
-        default=os.environ.get("MCP_SERVER_LISTEN_PORT", "8000"),
-        help="Port for the MCP server to listen on (default: 8000)",
+        default=os.environ.get("MCP_SERVER_LISTEN_PORT", "9001"),
+        help="Port for the MCP server to listen on (default: 9001)",
     )
 
     parser.add_argument(
@@ -69,7 +69,7 @@ def parse_arguments():
     parser.add_argument(
         "--base-url",
         type=str,
-        default=os.environ.get("API_BASE_URL", "http://localhost:8000"),
+        default=os.environ.get("API_BASE_URL", "http://localhost:9002"),
         help="Base URL for the API",
     )
 
@@ -91,7 +91,7 @@ def make_api_request(method: str, endpoint: str, params: dict = None, json_data:
     """Make HTTP request to API endpoint with error handling and authentication."""
     url = f"{args.base_url}{endpoint}"
     headers = {
-        "Authorization": f"Bearer {os.environ.get('MISSION_AUTH_TOKEN', '')}"
+        "Authorization": f"Bearer {os.environ.get('AUTH_TOKEN', '')}"
     }
     
     try:
@@ -247,7 +247,7 @@ API Integration:
   * For Bearer/JWT tokens: Add Authorization header "Bearer {token}" using environment variable
   * For API keys: Add appropriate header or query parameter using environment variable
   * For Basic auth: Add Authorization header "Basic {base64_credentials}" using environment variables
-  * Use environment variable names based on security scheme names (e.g., MISSION_AUTH_TOKEN for missionAuth)
+  * Use environment variable names based on security scheme names (e.g., AUTH_TOKEN for authentication)
 - Include authentication headers in ALL HTTP requests when security is defined
 - Support different content types as specified in the OpenAPI spec
 

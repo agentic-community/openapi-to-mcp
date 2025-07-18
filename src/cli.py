@@ -285,7 +285,25 @@ def _save_summary_file(
             f.write(f"| **Overall Quality** | {evaluation.overall.overall_quality.value.upper()} | {'Pass' if evaluation.overall.overall_quality.value.upper() in ['GOOD', 'EXCELLENT'] else 'Warning'} |\n")
             f.write(f"| **Completeness Score** | {evaluation.overall.completeness_score}/5 | {'Pass' if evaluation.overall.completeness_score >= 3 else 'Fail'} |\n")
             f.write(f"| **AI Readiness Score** | {evaluation.overall.ai_readiness_score}/5 | {'Pass' if evaluation.overall.ai_readiness_score >= 3 else 'Fail'} |\n")
-            f.write(f"| **MCP Generation Ready** | {'Yes' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'No'} | {'Pass' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'Fail'} |\n\n")
+            f.write(f"| **MCP Generation Ready** | {'Yes' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'No'} | {'Pass' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'Fail'} |\n")
+            
+            # Always include pagination and filtering support flags
+            pagination_support = getattr(evaluation.overall, 'pagination_support_adequate', None)
+            filtering_support = getattr(evaluation.overall, 'filtering_support_adequate', None)
+            
+            if pagination_support is not None:
+                status = 'Pass' if pagination_support else 'Fail'
+                f.write(f"| **Pagination Support Adequate** | {'Yes' if pagination_support else 'No'} | {status} |\n")
+            else:
+                f.write(f"| **Pagination Support Adequate** | Not Applicable | N/A |\n")
+                
+            if filtering_support is not None:
+                status = 'Pass' if filtering_support else 'Fail'
+                f.write(f"| **Filtering Support Adequate** | {'Yes' if filtering_support else 'No'} | {status} |\n")
+            else:
+                f.write(f"| **Filtering Support Adequate** | Not Applicable | N/A |\n")
+            
+            f.write(f"\n")
             
             # Usage and Cost Information (Evaluation Only)
             f.write(f"## Evaluation Usage & Cost Information\n\n")
@@ -360,14 +378,27 @@ def _save_summary_file(
                 
                 # Summary table
                 f.write(f"### Operations Overview\n\n")
-                f.write(f"| Operation | Method | Path | Description Quality | Parameter Completeness | Response Completeness |\n")
-                f.write(f"|-----------|--------|------|--------------------|-----------------------|----------------------|\n")
+                f.write(f"| Operation | Method | Path | Description Quality | Parameter Completeness | Response Completeness | Pagination | Filtering |\n")
+                f.write(f"|-----------|--------|------|--------------------|-----------------------|----------------------|------------|-----------|\n")
                 
                 for op in evaluation.operations:
                     desc_icon = 'Excellent' if op.description_quality == 'excellent' else 'Good' if op.description_quality == 'good' else 'Poor'
                     param_icon = 'Excellent' if op.parameter_completeness == 'excellent' else 'Good' if op.parameter_completeness == 'good' else 'Poor'
                     resp_icon = 'Excellent' if op.response_completeness == 'excellent' else 'Good' if op.response_completeness == 'good' else 'Poor'
-                    f.write(f"| `{op.operation_id}` | {op.method} | `{op.path}` | {desc_icon} {op.description_quality} | {param_icon} {op.parameter_completeness} | {resp_icon} {op.response_completeness} |\n")
+                    
+                    # Check for pagination and filtering support
+                    returns_list = getattr(op, 'returns_list', False)
+                    has_pagination = getattr(op, 'has_pagination', False)
+                    has_filtering = getattr(op, 'has_filtering', False)
+                    
+                    if returns_list:
+                        pagination_status = '✅ Yes' if has_pagination else '❌ No'
+                        filtering_status = '✅ Yes' if has_filtering else '❌ No'
+                    else:
+                        pagination_status = 'N/A'
+                        filtering_status = 'N/A'
+                    
+                    f.write(f"| `{op.operation_id}` | {op.method} | `{op.path}` | {desc_icon} {op.description_quality} | {param_icon} {op.parameter_completeness} | {resp_icon} {op.response_completeness} | {pagination_status} | {filtering_status} |\n")
                 
                 f.write("\n### Detailed Operation Analysis\n\n")
                 for op in evaluation.operations:
@@ -375,6 +406,20 @@ def _save_summary_file(
                     f.write(f"**Summary**: {op.summary}\n\n")
                     if op.description:
                         f.write(f"**Description**: {op.description}\n\n")
+                    
+                    # Add pagination and filtering information for operations returning lists
+                    returns_list = getattr(op, 'returns_list', False)
+                    if returns_list:
+                        f.write(f"**List Operation Support**:\n")
+                        has_pagination = getattr(op, 'has_pagination', False)
+                        has_filtering = getattr(op, 'has_filtering', False)
+                        pagination_readiness = getattr(op, 'pagination_readiness', 'not_applicable')
+                        filtering_readiness = getattr(op, 'filtering_readiness', 'not_applicable')
+                        
+                        f.write(f"- Returns List: Yes\n")
+                        f.write(f"- Pagination Support: {'✅ Yes' if has_pagination else '❌ No'} (Readiness: {pagination_readiness})\n")
+                        f.write(f"- Filtering Support: {'✅ Yes' if has_filtering else '❌ No'} (Readiness: {filtering_readiness})\n")
+                        f.write(f"\n")
                     
                     # Parameters
                     if op.parameters:
