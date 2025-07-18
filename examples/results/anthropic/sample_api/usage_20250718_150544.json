@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-07-18T15:06:37.689253",
+  "evaluation_id": "qg-api-eval-20241228-001",
+  "api_title": "Quantum Gravity Experiment API",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "summary": {
+    "total_tokens": 31530,
+    "total_cost_usd": 0.220638,
+    "total_calls": 3
+  },
+  "detailed_breakdown": {
+    "evaluation": {
+      "prompt_tokens": 6130,
+      "completion_tokens": 3340,
+      "total_tokens": 9470,
+      "total_cost_usd": 0.06849,
+      "calls_count": 1
+    },
+    "mcp_server_generation": {
+      "prompt_tokens": 7202,
+      "completion_tokens": 3400,
+      "total_tokens": 10602,
+      "total_cost_usd": 0.072606,
+      "calls_count": 1
+    },
+    "mcp_client_generation": {
+      "prompt_tokens": 7694,
+      "completion_tokens": 3764,
+      "total_tokens": 11458,
+      "total_cost_usd": 0.079542,
+      "calls_count": 1
+    }
+  }
+}

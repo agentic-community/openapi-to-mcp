@@ -1,0 +1,611 @@
+{
+  "evaluation_id": "qg-api-eval-20241228-001",
+  "original_spec_url": null,
+  "original_spec_filename": null,
+  "evaluation_timestamp": "2025-07-18T15:06:37.689254",
+  "timestamp": "2025-07-18T15:06:37.689253",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "enhancement_level": "comprehensive",
+  "openapi_version": "3.0.3",
+  "api_title": "Quantum Gravity Experiment API",
+  "api_version": "2.1.0",
+  "security_schemes": [
+    {
+      "type": "http",
+      "name": "missionAuth",
+      "description": "JWT token for mission control authorization",
+      "required": true
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "getSpaceshipTelemetry",
+      "method": "GET",
+      "path": "/spaceship/telemetry",
+      "summary": "Get spaceship telemetry data",
+      "description": "Retrieve current position, velocity, and acceleration data for the research vessel relative to Sagittarius A* black hole. Includes relativistic corrections.",
+      "description_quality": "excellent",
+      "parameter_completeness": "good",
+      "response_completeness": "good",
+      "parameters": [
+        {
+          "name": "timeframe",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add examples for each enum value"
+          ]
+        },
+        {
+          "name": "reference_frame",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add examples explaining the differences between reference frames"
+          ]
+        }
+      ],
+      "responses": [
+        {
+          "status_code": "200",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": true,
+          "headers_documented": false,
+          "suggestions": [
+            "Consider adding response headers for data freshness/cache control"
+          ]
+        },
+        {
+          "status_code": "401",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": true,
+          "headers_documented": false,
+          "suggestions": []
+        },
+        {
+          "status_code": "500",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": true,
+          "headers_documented": false,
+          "suggestions": []
+        }
+      ],
+      "missing_parameters": [],
+      "missing_responses": [],
+      "enhancement_suggestions": [
+        "Add rate limiting information",
+        "Consider adding data freshness indicators"
+      ]
+    },
+    {
+      "operation_id": "getQuantumGravityData",
+      "method": "GET",
+      "path": "/experiments/quantum-gravity",
+      "summary": "Get quantum gravity measurement data",
+      "description": "Retrieve quantum field measurements and gravitational wave data collected by the onboard quantum sensors as the spaceship approaches the black hole.",
+      "description_quality": "excellent",
+      "parameter_completeness": "good",
+      "response_completeness": "fair",
+      "parameters": [
+        {
+          "name": "experiment_type",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add examples for each experiment type"
+          ]
+        },
+        {
+          "name": "start_time",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add example timestamp"
+          ]
+        },
+        {
+          "name": "end_time",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add example timestamp"
+          ]
+        }
+      ],
+      "responses": [
+        {
+          "status_code": "200",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": [
+            "Add response examples",
+            "Consider pagination headers for large datasets"
+          ]
+        },
+        {
+          "status_code": "400",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        },
+        {
+          "status_code": "401",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        }
+      ],
+      "missing_parameters": [
+        "limit",
+        "offset",
+        "sort_by"
+      ],
+      "missing_responses": [
+        "500"
+      ],
+      "enhancement_suggestions": [
+        "Add pagination parameters (limit, offset)",
+        "Add sorting capabilities",
+        "Include total count in response",
+        "Add 500 error response"
+      ]
+    },
+    {
+      "operation_id": "getBlackHoleProximity",
+      "method": "GET",
+      "path": "/blackhole/proximity",
+      "summary": "Get black hole proximity measurements",
+      "description": "Get detailed measurements of the spaceship's proximity to Sagittarius A*, including tidal forces, redshift effects, and time dilation calculations.",
+      "description_quality": "excellent",
+      "parameter_completeness": "excellent",
+      "response_completeness": "good",
+      "parameters": [],
+      "responses": [
+        {
+          "status_code": "200",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": true,
+          "headers_documented": false,
+          "suggestions": []
+        },
+        {
+          "status_code": "401",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        }
+      ],
+      "missing_parameters": [],
+      "missing_responses": [
+        "500"
+      ],
+      "enhancement_suggestions": [
+        "Add 500 error response",
+        "Consider adding historical data parameters"
+      ]
+    },
+    {
+      "operation_id": "controlExperiment",
+      "method": "POST",
+      "path": "/experiments/control",
+      "summary": "Start or configure quantum experiments",
+      "description": "Initialize or modify quantum gravity experiments based on current spaceship position and gravitational field conditions.",
+      "description_quality": "excellent",
+      "parameter_completeness": "excellent",
+      "response_completeness": "good",
+      "parameters": [],
+      "responses": [
+        {
+          "status_code": "201",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": [
+            "Add response example",
+            "Consider adding Location header for created resource"
+          ]
+        },
+        {
+          "status_code": "400",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        },
+        {
+          "status_code": "409",
+          "description_quality": "excellent",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        }
+      ],
+      "missing_parameters": [],
+      "missing_responses": [
+        "401",
+        "500"
+      ],
+      "enhancement_suggestions": [
+        "Add 401 and 500 error responses",
+        "Add response examples",
+        "Consider adding validation error details in 400 response"
+      ]
+    },
+    {
+      "operation_id": "getExperimentResults",
+      "method": "GET",
+      "path": "/experiments/{experimentId}/results",
+      "summary": "Get experimental results",
+      "description": "Retrieve processed results from completed quantum gravity experiments, including statistical analysis and theoretical comparisons.",
+      "description_quality": "excellent",
+      "parameter_completeness": "excellent",
+      "response_completeness": "good",
+      "parameters": [
+        {
+          "name": "experimentId",
+          "location": "path",
+          "description_quality": "good",
+          "example_provided": true,
+          "constraints_defined": true,
+          "suggestions": []
+        },
+        {
+          "name": "format",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add examples for different format outputs"
+          ]
+        },
+        {
+          "name": "analysis_level",
+          "location": "query",
+          "description_quality": "good",
+          "example_provided": false,
+          "constraints_defined": true,
+          "suggestions": [
+            "Add examples explaining each analysis level"
+          ]
+        }
+      ],
+      "responses": [
+        {
+          "status_code": "200",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": [
+            "Add response examples",
+            "Consider adding Content-Type headers for different formats"
+          ]
+        },
+        {
+          "status_code": "404",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        },
+        {
+          "status_code": "401",
+          "description_quality": "good",
+          "schema_provided": true,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": []
+        }
+      ],
+      "missing_parameters": [],
+      "missing_responses": [
+        "500"
+      ],
+      "enhancement_suggestions": [
+        "Add 500 error response",
+        "Add response examples",
+        "Consider adding content negotiation headers"
+      ]
+    }
+  ],
+  "schemas": [
+    {
+      "schema_name": "SpaceshipTelemetry",
+      "description_quality": "good",
+      "properties_documented": true,
+      "examples_provided": false,
+      "required_fields_specified": true,
+      "suggestions": [
+        "Add schema-level example"
+      ]
+    },
+    {
+      "schema_name": "Position",
+      "description_quality": "excellent",
+      "properties_documented": true,
+      "examples_provided": true,
+      "required_fields_specified": true,
+      "suggestions": []
+    },
+    {
+      "schema_name": "QuantumGravityData",
+      "description_quality": "good",
+      "properties_documented": false,
+      "examples_provided": false,
+      "required_fields_specified": true,
+      "suggestions": [
+        "Add property descriptions",
+        "Add schema-level example"
+      ]
+    },
+    {
+      "schema_name": "ExperimentConfig",
+      "description_quality": "excellent",
+      "properties_documented": true,
+      "examples_provided": false,
+      "required_fields_specified": true,
+      "suggestions": [
+        "Add schema-level example"
+      ]
+    },
+    {
+      "schema_name": "Error",
+      "description_quality": "excellent",
+      "properties_documented": true,
+      "examples_provided": false,
+      "required_fields_specified": true,
+      "suggestions": []
+    }
+  ],
+  "overall": {
+    "overall_quality": "good",
+    "completeness_score": 4,
+    "ai_readiness_score": 3,
+    "has_comprehensive_descriptions": true,
+    "has_good_examples": false,
+    "has_proper_error_handling": true,
+    "security_well_defined": true,
+    "major_improvements_needed": [
+      "Add pagination parameters to /experiments/quantum-gravity endpoint",
+      "Add comprehensive examples throughout the specification",
+      "Add missing 500 error responses to all operations",
+      "Improve list operation data volume management"
+    ],
+    "minor_improvements_suggested": [
+      "Add parameter examples for enum values",
+      "Add response examples for all operations",
+      "Add response headers documentation",
+      "Add schema-level examples",
+      "Consider adding rate limiting information",
+      "Add sorting capabilities to list operations"
+    ],
+    "key_strengths": [],
+    "areas_for_improvement": [],
+    "recommendations": []
+  },
+  "needs_enhancement": true,
+  "enhancement_priority": "medium",
+  "enhanced_openapi_spec": null,
+  "linting_results": {
+    "total_issues": 20,
+    "error_count": 7,
+    "warning_count": 0,
+    "info_count": 0,
+    "suggestion_count": 13,
+    "issues": [
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 401 has no description",
+        "path": "$.paths./spaceship/telemetry.get.responses.401.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 500 has no description",
+        "path": "$.paths./spaceship/telemetry.get.responses.500.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 400 has no description",
+        "path": "$.paths./experiments/quantum-gravity.get.responses.400.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 401 has no description",
+        "path": "$.paths./experiments/quantum-gravity.get.responses.401.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 401 has no description",
+        "path": "$.paths./blackhole/proximity.get.responses.401.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 400 has no description",
+        "path": "$.paths./experiments/control.post.responses.400.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "error",
+        "rule": "response-description-missing",
+        "message": "Response 401 has no description",
+        "path": "$.paths./experiments/{experimentId}/results.get.responses.401.description",
+        "location": null,
+        "suggestion": "Add description explaining what this response represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'SpaceshipTelemetry' has no description",
+        "path": "$.components.schemas.SpaceshipTelemetry.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'Position' has no description",
+        "path": "$.components.schemas.Position.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'SphericalCoordinates' has no description",
+        "path": "$.components.schemas.SphericalCoordinates.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'Velocity' has no description",
+        "path": "$.components.schemas.Velocity.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'QuantumGravityData' has no description",
+        "path": "$.components.schemas.QuantumGravityData.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'QuantumMeasurement' has no description",
+        "path": "$.components.schemas.QuantumMeasurement.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'BlackHoleProximity' has no description",
+        "path": "$.components.schemas.BlackHoleProximity.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'ExperimentConfig' has no description",
+        "path": "$.components.schemas.ExperimentConfig.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'QuantumFieldParameters' has no description",
+        "path": "$.components.schemas.QuantumFieldParameters.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'ExperimentStatus' has no description",
+        "path": "$.components.schemas.ExperimentStatus.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'ExperimentResults' has no description",
+        "path": "$.components.schemas.ExperimentResults.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'StatisticalAnalysis' has no description",
+        "path": "$.components.schemas.StatisticalAnalysis.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "schema-description-missing",
+        "message": "Schema 'Error' has no description",
+        "path": "$.components.schemas.Error.description",
+        "location": null,
+        "suggestion": "Add description explaining what this schema represents"
+      }
+    ],
+    "linting_score": 1,
+    "linting_summary": "Found 20 issues: 7 errors, 13 suggestions. Address errors first as they may prevent proper API functionality."
+  },
+  "total_tokens": 31530,
+  "total_cost_usd": 0.220638,
+  "llm_calls_count": 3,
+  "evaluation_usage": {
+    "prompt_tokens": 6130,
+    "completion_tokens": 3340,
+    "total_tokens": 9470,
+    "total_cost_usd": 0.06849,
+    "calls_count": 1
+  },
+  "mcp_server_usage": {
+    "prompt_tokens": 7202,
+    "completion_tokens": 3400,
+    "total_tokens": 10602,
+    "total_cost_usd": 0.072606,
+    "calls_count": 1
+  },
+  "mcp_client_usage": {
+    "prompt_tokens": 7694,
+    "completion_tokens": 3764,
+    "total_tokens": 11458,
+    "total_cost_usd": 0.079542,
+    "calls_count": 1
+  }
+}

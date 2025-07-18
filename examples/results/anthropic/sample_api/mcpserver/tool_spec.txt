@@ -1,0 +1,118 @@
+# MCP Tool Specifications for Quantum Gravity Experiment API
+# Generated on: 2025-07-18 15:07:56
+# 
+# This file contains the function signatures and docstrings for all MCP tools
+# that are decorated with @mcp.tool() in the generated server code.
+#
+# Format:
+# ========================================
+# TOOL: <function_name>
+# SIGNATURE: <function_signature>
+# DOCSTRING:
+# <docstring_content>
+# ========================================
+
+================================================================================
+TOOL: get_spaceship_telemetry
+SIGNATURE: def get_spaceship_telemetry(timeframe: Annotated[str, Field(default='realtime', description='Time range for telemetry data: realtime, last_hour, last_day, last_week')], reference_frame: Annotated[str, Field(default='schwarzschild', description='Reference frame for measurements: schwarzschild, kerr, galactic_center')]) -> Dict[str, Any]
+DOCSTRING:
+
+      Retrieve current position, velocity, and acceleration data for the research vessel
+      relative to Sagittarius A* black hole. Includes relativistic corrections.
+
+      Args:
+          timeframe: Time range for telemetry data
+          reference_frame: Reference frame for measurements
+
+      Returns:
+          Dict containing spaceship telemetry data including position, velocity, and gravitational field strength
+
+      Raises:
+          Exception: If the API request fails
+
+================================================================================
+
+================================================================================
+TOOL: get_black_hole_proximity
+SIGNATURE: def get_black_hole_proximity() -> Dict[str, Any]
+DOCSTRING:
+
+      Get detailed measurements of the spaceship's proximity to Sagittarius A*,
+      including tidal forces, redshift effects, and time dilation calculations.
+
+      Returns:
+          Dict containing black hole proximity data including distance to event horizon,
+          tidal acceleration, gravitational redshift, and time dilation factor
+
+      Raises:
+          Exception: If the API request fails
+
+================================================================================
+
+================================================================================
+TOOL: get_quantum_gravity_data
+SIGNATURE: def get_quantum_gravity_data(experiment_type: Annotated[Optional[str], Field(default=None, description='Type of quantum gravity experiment: vacuum_fluctuations, entanglement_degradation, hawking_radiation, spacetime_curvature')], start_time: Annotated[Optional[str], Field(default=None, description='Start time for data collection (ISO 8601 format)')], end_time: Annotated[Optional[str], Field(default=None, description='End time for data collection (ISO 8601 format)')]) -> Dict[str, Any]
+DOCSTRING:
+
+      Retrieve quantum field measurements and gravitational wave data collected
+      by the onboard quantum sensors as the spaceship approaches the black hole.
+
+      Args:
+          experiment_type: Type of quantum gravity experiment to filter by
+          start_time: Start time for data collection in ISO 8601 format
+          end_time: End time for data collection in ISO 8601 format
+
+      Returns:
+          Dict containing quantum gravity measurement data including measurements and statistical analysis
+
+      Raises:
+          Exception: If the API request fails
+
+================================================================================
+
+================================================================================
+TOOL: control_experiment
+SIGNATURE: def control_experiment(experiment_type: Annotated[str, Field(description='Type of experiment: vacuum_fluctuations, entanglement_degradation, hawking_radiation, spacetime_curvature')], duration_seconds: Annotated[int, Field(description='Experiment duration in seconds (60-86400)')], measurement_frequency: Annotated[float, Field(description='Measurements per second (0.1-10000)')], coupling_constant: Annotated[Optional[float], Field(default=None, description='Quantum field coupling constant (0-1)')], energy_scale: Annotated[Optional[float], Field(default=None, description='Energy scale for quantum measurements in Joules')]) -> Dict[str, Any]
+DOCSTRING:
+
+      Initialize or modify quantum gravity experiments based on current
+      spaceship position and gravitational field conditions.
+
+      Args:
+          experiment_type: Type of experiment to run
+          duration_seconds: Experiment duration in seconds
+          measurement_frequency: Measurements per second
+          coupling_constant: Quantum field coupling constant (optional)
+          energy_scale: Energy scale for quantum measurements (optional)
+
+      Returns:
+          Dict containing experiment status information
+
+      Raises:
+          Exception: If the API request fails
+
+================================================================================
+
+================================================================================
+TOOL: get_experiment_results
+SIGNATURE: def get_experiment_results(experiment_id: Annotated[str, Field(description='Unique identifier for the experiment (UUID format)')], format: Annotated[str, Field(default='json', description='Output format for results: json, csv, hdf5')], analysis_level: Annotated[str, Field(default='processed', description='Level of data analysis to include: raw, processed, theoretical_comparison')]) -> Dict[str, Any]
+DOCSTRING:
+
+      Retrieve processed results from completed quantum gravity experiments,
+      including statistical analysis and theoretical comparisons.
+
+      Args:
+          experiment_id: Unique identifier for the experiment
+          format: Output format for results
+          analysis_level: Level of data analysis to include
+
+      Returns:
+          Dict containing experimental results data including key findings and raw data URL
+
+      Raises:
+          Exception: If the API request fails
+
+================================================================================
+
+
+Total MCP Tools: 5

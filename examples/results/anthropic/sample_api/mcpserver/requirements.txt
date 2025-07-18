@@ -1,0 +1,6 @@
+# MCP Server and Client Requirements
+fastmcp>=2.9.0
+requests>=2.31.0
+pydantic>=2.0.0
+PyYAML>=6.0.0
+httpx>=0.24.0

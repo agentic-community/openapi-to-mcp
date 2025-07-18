@@ -164,7 +164,9 @@ cython_debug/
 
 # Project specific
 output/
+# Ignore results directories everywhere except in examples
 results/
+!examples/results/
 
 # macOS
 .DS_Store

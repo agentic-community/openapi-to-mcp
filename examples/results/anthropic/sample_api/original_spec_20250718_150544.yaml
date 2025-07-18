@@ -1,0 +1,574 @@
+openapi: 3.0.3
+info:
+  title: Quantum Gravity Experiment API
+  version: 2.1.0
+  description: |
+    API for collecting and analyzing data from the Event Horizon Research Vessel (EHRV) 
+    as it approaches Sagittarius A* for quantum gravity experiments. This mission studies
+    the intersection of quantum mechanics and general relativity in extreme gravitational fields.
+    
+    **Mission Objectives:**
+    - Measure quantum field fluctuations near the event horizon
+    - Test quantum gravity theories (Loop Quantum Gravity, String Theory)
+    - Study Hawking radiation and information paradox
+    - Observe spacetime curvature effects on quantum systems
+  contact:
+    name: Deep Space Physics Research Team
+    email: physics@spaceship.gov
+    url: https://quantum-gravity-mission.space
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Local development server (production default)
+  - url: https://api.quantum-gravity.space/v2
+    description: Remote production mission control API
+  - url: https://staging-api.quantum-gravity.space/v2
+    description: Staging environment for testing
+
+security:
+  - missionAuth: []
+
+paths:
+  /spaceship/telemetry:
+    get:
+      summary: Get spaceship telemetry data
+      description: |
+        Retrieve current position, velocity, and acceleration data for the research vessel
+        relative to Sagittarius A* black hole. Includes relativistic corrections.
+      operationId: getSpaceshipTelemetry
+      tags:
+        - Spaceship Operations
+      parameters:
+        - name: timeframe
+          in: query
+          description: Time range for telemetry data
+          required: false
+          schema:
+            type: string
+            enum: [realtime, last_hour, last_day, last_week]
+            default: realtime
+        - name: reference_frame
+          in: query
+          description: Reference frame for measurements
+          required: false
+          schema:
+            type: string
+            enum: [schwarzschild, kerr, galactic_center]
+            default: schwarzschild
+      responses:
+        '200':
+          description: Spaceship telemetry data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceshipTelemetry'
+              example:
+                timestamp: "2024-12-28T15:30:00Z"
+                position:
+                  distance_to_event_horizon: 1.2e12
+                  schwarzschild_radius: 1.18e10
+                  coordinates: { r: 1.2012e12, theta: 1.5708, phi: 0.7854 }
+                velocity:
+                  radial_velocity: -2.1e7
+                  tangential_velocity: 8.9e6
+                  relativistic_gamma: 1.0023
+                gravitational_field_strength: 8.2e-4
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /experiments/quantum-gravity:
+    get:
+      summary: Get quantum gravity measurement data
+      description: |
+        Retrieve quantum field measurements and gravitational wave data collected
+        by the onboard quantum sensors as the spaceship approaches the black hole.
+      operationId: getQuantumGravityData
+      tags:
+        - Quantum Experiments
+      parameters:
+        - name: experiment_type
+          in: query
+          description: Type of quantum gravity experiment
+          required: false
+          schema:
+            type: string
+            enum: [vacuum_fluctuations, entanglement_degradation, hawking_radiation, spacetime_curvature]
+        - name: start_time
+          in: query
+          description: Start time for data collection (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: end_time
+          in: query
+          description: End time for data collection (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Quantum gravity measurement data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantumGravityData'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /blackhole/proximity:
+    get:
+      summary: Get black hole proximity measurements
+      description: |
+        Get detailed measurements of the spaceship's proximity to Sagittarius A*,
+        including tidal forces, redshift effects, and time dilation calculations.
+      operationId: getBlackHoleProximity
+      tags:
+        - Black Hole Physics
+      responses:
+        '200':
+          description: Black hole proximity data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlackHoleProximity'
+              example:
+                distance_to_event_horizon: 1.2e12
+                schwarzschild_radius: 1.18e10
+                tidal_acceleration: 2.3e-8
+                gravitational_redshift: 0.0012
+                time_dilation_factor: 1.0000006
+                hawking_temperature: 6.2e-8
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /experiments/control:
+    post:
+      summary: Start or configure quantum experiments
+      description: |
+        Initialize or modify quantum gravity experiments based on current 
+        spaceship position and gravitational field conditions.
+      operationId: controlExperiment
+      tags:
+        - Experiment Control
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExperimentConfig'
+            example:
+              experiment_type: "vacuum_fluctuations"
+              duration_seconds: 3600
+              measurement_frequency: 1000
+              quantum_field_parameters:
+                energy_scale: 1.0e-15
+                coupling_constant: 0.1
+      responses:
+        '201':
+          description: Experiment started successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentStatus'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Another experiment is already running
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /experiments/{experimentId}/results:
+    get:
+      summary: Get experimental results
+      description: |
+        Retrieve processed results from completed quantum gravity experiments,
+        including statistical analysis and theoretical comparisons.
+      operationId: getExperimentResults
+      tags:
+        - Experimental Results
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          description: Unique identifier for the experiment
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        - name: format
+          in: query
+          description: Output format for results
+          schema:
+            type: string
+            enum: [json, csv, hdf5]
+            default: json
+        - name: analysis_level
+          in: query
+          description: Level of data analysis to include
+          schema:
+            type: string
+            enum: [raw, processed, theoretical_comparison]
+            default: processed
+      responses:
+        '200':
+          description: Experimental results data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExperimentResults'
+        '404':
+          description: Experiment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    missionAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for mission control authorization
+
+  schemas:
+    SpaceshipTelemetry:
+      type: object
+      required:
+        - timestamp
+        - position
+        - velocity
+        - gravitational_field_strength
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          description: UTC timestamp of measurement
+        position:
+          $ref: '#/components/schemas/Position'
+        velocity:
+          $ref: '#/components/schemas/Velocity'
+        gravitational_field_strength:
+          type: number
+          format: double
+          description: Local gravitational field strength (m/s²)
+          example: 8.2e-4
+
+    Position:
+      type: object
+      required:
+        - distance_to_event_horizon
+        - schwarzschild_radius
+        - coordinates
+      properties:
+        distance_to_event_horizon:
+          type: number
+          format: double
+          description: Distance to black hole event horizon (meters)
+          example: 1.2e12
+        schwarzschild_radius:
+          type: number
+          format: double
+          description: Schwarzschild radius of the black hole (meters)
+          example: 1.18e10
+        coordinates:
+          $ref: '#/components/schemas/SphericalCoordinates'
+
+    SphericalCoordinates:
+      type: object
+      required: [r, theta, phi]
+      properties:
+        r:
+          type: number
+          format: double
+          description: Radial distance from black hole center (meters)
+        theta:
+          type: number
+          format: double
+          description: Polar angle (radians)
+        phi:
+          type: number
+          format: double
+          description: Azimuthal angle (radians)
+
+    Velocity:
+      type: object
+      required:
+        - radial_velocity
+        - tangential_velocity
+        - relativistic_gamma
+      properties:
+        radial_velocity:
+          type: number
+          format: double
+          description: Velocity component toward/away from black hole (m/s)
+          example: -2.1e7
+        tangential_velocity:
+          type: number
+          format: double
+          description: Tangential velocity component (m/s)
+          example: 8.9e6
+        relativistic_gamma:
+          type: number
+          format: double
+          description: Lorentz factor for relativistic corrections
+          example: 1.0023
+
+    QuantumGravityData:
+      type: object
+      required:
+        - experiment_type
+        - timestamp
+        - measurements
+        - statistical_analysis
+      properties:
+        experiment_type:
+          type: string
+          enum: [vacuum_fluctuations, entanglement_degradation, hawking_radiation, spacetime_curvature]
+        timestamp:
+          type: string
+          format: date-time
+        measurements:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuantumMeasurement'
+        statistical_analysis:
+          $ref: '#/components/schemas/StatisticalAnalysis'
+
+    QuantumMeasurement:
+      type: object
+      required: [timestamp, field_strength, uncertainty]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        field_strength:
+          type: number
+          format: double
+          description: Measured quantum field strength
+        uncertainty:
+          type: number
+          format: double
+          description: Measurement uncertainty (Heisenberg principle)
+        entanglement_measure:
+          type: number
+          format: double
+          description: Degree of quantum entanglement
+
+    BlackHoleProximity:
+      type: object
+      required:
+        - distance_to_event_horizon
+        - tidal_acceleration
+        - gravitational_redshift
+        - time_dilation_factor
+      properties:
+        distance_to_event_horizon:
+          type: number
+          format: double
+          description: Current distance to event horizon (meters)
+        schwarzschild_radius:
+          type: number
+          format: double
+          description: Schwarzschild radius (meters)
+        tidal_acceleration:
+          type: number
+          format: double
+          description: Tidal acceleration experienced (m/s²)
+        gravitational_redshift:
+          type: number
+          format: double
+          description: Gravitational redshift factor
+        time_dilation_factor:
+          type: number
+          format: double
+          description: Time dilation relative to distant observer
+        hawking_temperature:
+          type: number
+          format: double
+          description: Theoretical Hawking temperature (Kelvin)
+
+    ExperimentConfig:
+      type: object
+      required:
+        - experiment_type
+        - duration_seconds
+        - measurement_frequency
+      properties:
+        experiment_type:
+          type: string
+          enum: [vacuum_fluctuations, entanglement_degradation, hawking_radiation, spacetime_curvature]
+        duration_seconds:
+          type: integer
+          minimum: 60
+          maximum: 86400
+          description: Experiment duration in seconds
+        measurement_frequency:
+          type: number
+          minimum: 0.1
+          maximum: 10000
+          description: Measurements per second
+        quantum_field_parameters:
+          $ref: '#/components/schemas/QuantumFieldParameters'
+
+    QuantumFieldParameters:
+      type: object
+      properties:
+        energy_scale:
+          type: number
+          format: double
+          description: Energy scale for quantum measurements (Joules)
+        coupling_constant:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          description: Quantum field coupling constant
+
+    ExperimentStatus:
+      type: object
+      required: [experiment_id, status, start_time]
+      properties:
+        experiment_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [running, completed, failed, paused]
+        start_time:
+          type: string
+          format: date-time
+        estimated_completion:
+          type: string
+          format: date-time
+        progress_percentage:
+          type: number
+          minimum: 0
+          maximum: 100
+
+    ExperimentResults:
+      type: object
+      required:
+        - experiment_id
+        - experiment_type
+        - completion_time
+        - data_points_collected
+        - key_findings
+      properties:
+        experiment_id:
+          type: string
+          format: uuid
+        experiment_type:
+          type: string
+        completion_time:
+          type: string
+          format: date-time
+        data_points_collected:
+          type: integer
+          minimum: 0
+        key_findings:
+          type: array
+          items:
+            type: string
+        theoretical_predictions:
+          type: object
+          additionalProperties: true
+        raw_data_url:
+          type: string
+          format: uri
+          description: URL to download raw experimental data
+
+    StatisticalAnalysis:
+      type: object
+      properties:
+        mean:
+          type: number
+          format: double
+        standard_deviation:
+          type: number
+          format: double
+        confidence_interval:
+          type: object
+          properties:
+            lower_bound:
+              type: number
+              format: double
+            upper_bound:
+              type: number
+              format: double
+            confidence_level:
+              type: number
+              format: double
+              example: 0.95
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "INVALID_PARAMETER"
+            message: "Invalid experiment type specified"
+            timestamp: "2024-12-28T15:30:00Z"
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing authentication
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "UNAUTHORIZED"
+            message: "Valid mission control authorization required"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: "INTERNAL_ERROR"
+            message: "Spaceship communication system temporarily unavailable"
+
+tags:
+  - name: Spaceship Operations
+    description: Core spaceship telemetry and operational data
+  - name: Quantum Experiments
+    description: Quantum gravity and field measurement experiments
+  - name: Black Hole Physics
+    description: Black hole proximity and relativistic effects
+  - name: Experiment Control
+    description: Control and configuration of scientific experiments
+  - name: Experimental Results
+    description: Results and analysis from completed experiments 
