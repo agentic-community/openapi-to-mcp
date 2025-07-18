@@ -1,0 +1,255 @@
+You are an expert software developer who writes simple, performant code for MCP (Model Context Protocol) servers using the FastMCP framework. You create clean, maintainable code that entry-level developers can understand and maintain over the years.
+
+<task>
+Generate a complete MCP server implementation in Python that provides tools for each API endpoint defined in the OpenAPI specification. Each path in the API spec should become a separate MCP tool that users can call.
+</task>
+
+<requirements>
+1. Use the FastMCP framework with proper imports and setup
+2. Create one @mcp.tool() function for each API endpoint (path + method combination)
+3. Use proper type annotations with Pydantic Field descriptions
+4. Include comprehensive error handling and logging
+5. Follow the logging configuration format: logging.basicConfig(level=logging.INFO, format="%(asctime)s,p%(process)s,{%(filename)s:%(lineno)d},%(levelname)s,%(message)s")
+6. Include command line argument parsing for host, port, transport, and base-url
+7. Include a system prompt for AI agents using @mcp.prompt()
+8. Include a resource endpoint with @mcp.resource()
+9. Use simple, readable code that avoids clever programming tricks
+10. Include proper docstrings for all functions
+11. Make HTTP requests to the actual API endpoints using the requests library
+12. Handle both path parameters and query parameters properly
+13. Include request body handling for POST/PUT/PATCH operations
+14. Return structured JSON responses from the API calls
+15. Implement authentication headers based on OpenAPI security schemes (Bearer tokens, API keys, etc.)
+16. Use environment variables for API credentials and include authentication in all HTTP requests
+17. Create a reusable helper function for making authenticated API requests
+</requirements>
+
+<example_mcp_server>
+"""
+This server provides an interface to get the current time in a specified timezone using the timeapi.io API.
+"""
+
+import os
+import time
+import random
+import requests
+import argparse
+import logging
+from fastmcp import FastMCP
+from pydantic import BaseModel, Field
+from typing import Annotated
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s,p%(process)s,{%(filename)s:%(lineno)d},%(levelname)s,%(message)s'
+)
+logger = logging.getLogger(__name__)
+
+def parse_arguments():
+    """Parse command line arguments with defaults matching environment variables."""
+    parser = argparse.ArgumentParser(description="Current Time MCP Server")
+
+    parser.add_argument(
+        "--host",
+        type=str,
+        default=os.environ.get("MCP_SERVER_HOST", "127.0.0.1"),
+        help="Host for the MCP server to bind to (default: 127.0.0.1)",
+    )
+
+    parser.add_argument(
+        "--port",
+        type=str,
+        default=os.environ.get("MCP_SERVER_LISTEN_PORT", "9000"),
+        help="Port for the MCP server to listen on (default: 9000)",
+    )
+
+    parser.add_argument(
+        "--transport",
+        type=str,
+        default=os.environ.get("MCP_TRANSPORT", "sse"),
+        help="Transport type for the MCP server (default: sse)",
+    )
+
+    parser.add_argument(
+        "--base-url",
+        type=str,
+        default=os.environ.get("API_BASE_URL", "http://localhost:8000"),
+        help="Base URL for the API",
+    )
+
+    return parser.parse_args()
+
+
+# Parse arguments at module level to make them available
+args = parse_arguments()
+
+# Initialize FastMCP server
+mcp = FastMCP("CurrentTimeAPI")
+
+def make_api_request(method: str, endpoint: str, params: dict = None, json_data: dict = None) -> dict:
+    """Make HTTP request to API endpoint with error handling and authentication."""
+    url = f"{args.base_url}{endpoint}"
+    headers = {
+        "Authorization": f"Bearer {os.environ.get('MISSION_AUTH_TOKEN', '')}"
+    }
+    
+    try:
+        response = requests.request(
+            method=method,
+            url=url,
+            params=params,
+            json=json_data,
+            headers=headers
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API request failed: {str(e)}")
+        raise Exception(f"API request failed: {str(e)}")
+
+
+@mcp.prompt()
+def system_prompt_for_agent(location: str) -> str:
+    """
+    Generates a system prompt for an AI Agent that wants to use the current_time MCP server.
+
+    This function creates a specialized prompt for an AI agent that wants to determine the current time in a specific timezone.
+    The prompt instructs an model to provide the name of a timezone closest to the current location provided by the
+    user so that the timezone name (such as America/New_York, Africa/Cairo etc.) can be passed as an input to the tools
+    provided by the current_time MCP server.
+    Args:
+        location (str): The location of the user, which will be used to determine the timezone.
+
+    Returns:
+        str: A formatted system prompt for the AI Agent.
+    """
+
+    system_prompt = f"""
+You are an expert AI agent that wants to use the current_time MCP server. You will be provided with the user's location as input.
+You will need to determine the name of the timezone closest to the current location provided by the user so that the timezone name (such as America/New_York, Africa/Cairo etc.)
+can be passed as an input to the tools provided by the current_time MCP server.
+
+The user's location is: {location}
+"""
+    return system_prompt
+
+
+
+from datetime import datetime
+import pytz
+
+def get_current_time_in_timezone(timezone_name):
+    """
+    Retrieves the current time in a specified timezone.
+
+    Args:
+        timezone_name: A string representing the timezone name (e.g., 'America/New_York', 'Europe/London').
+
+    Returns:
+        A datetime object representing the current time in the specified timezone, or None if the timezone is invalid.
+    """
+    try:
+        timezone = pytz.timezone(timezone_name)
+        current_time = datetime.now(timezone)
+        return current_time
+    except pytz.exceptions.UnknownTimeZoneError:
+        return None
+
+
+@mcp.tool()
+def current_time_by_timezone(
+    tz_name: Annotated[str, Field(
+        default="America/New_York",
+        description="Name of the timezone for which to find out the current time"
+    )] = "America/New_York"
+) -> str:
+    """
+    Get the current time for a specified timezone using the timeapi.io API.
+
+    Args:
+        tz_name: Name of the timezone for which to find out the current time (default: America/New_York)
+
+    Returns:
+        str: string representation of the current time in the %Y-%m-%d %H:%M:%S %Z%z format for the specified timezone.
+
+    Raises:
+        Exception: If the API request fails
+    """
+
+    try:
+        timezone = pytz.timezone(tz_name)
+        current_time = datetime.now(timezone)
+        return current_time.strftime('%Y-%m-%d %H:%M:%S %Z%z')
+    except Exception as e:
+        return f"Error: {str(e)}"
+    
+@mcp.resource("config://app")
+def get_config() -> str:
+    """Static configuration data"""
+    return "App configuration here"
+
+
+def main():
+    # Run the server with the specified transport from command line args
+    logger.info(f"Starting server on {args.host}:{args.port}")
+    logger.info(f"Using API base URL: {args.base_url}")
+    logger.info(f"Transport: {args.transport}")
+    logger.info(f"Configuration source: CLI args and environment variables")
+    mcp.run(transport=args.transport, host=args.host, port=int(args.port))
+
+
+if __name__ == "__main__":
+    main()
+</example_mcp_server>
+
+<openapi_specification>
+{openapi_spec}
+</openapi_specification>
+
+<instructions>
+Generate a complete MCP server that:
+1. Imports all necessary dependencies (os, json, logging, argparse, requests, typing, mcp.server.fastmcp, pydantic)
+2. Sets up logging using the required format exactly as shown in the example
+3. Includes argument parsing for host, port, transport, and base-url with proper defaults from environment variables
+4. Initializes FastMCP with a meaningful server name and proper configuration
+5. Creates one tool function for each API endpoint in the OpenAPI spec (each path + method combination)
+6. Create a helper function make_api_request() that handles authentication headers and HTTP requests
+7. Each tool should use the helper function to make requests to actual API endpoints
+8. Handle path parameters by replacing {param} placeholders in the endpoint URL
+9. Handle query parameters by building a params dictionary
+10. Handle request bodies for POST/PUT/PATCH operations
+11. Include proper error handling with try/catch blocks and logging
+12. Return structured responses (preferably JSON when possible)
+13. Has a system prompt that explains the available tools and their purposes
+14. Includes a configuration resource that returns useful server metadata
+15. Has a main() function that starts the server with proper logging
+
+Code structure:
+- Use descriptive function names based on operationId or auto-generate from path/method
+- Include comprehensive docstrings for all tool functions
+- Use proper type hints with Annotated and Field descriptions
+- Handle both required and optional parameters correctly
+- Include default values where specified in the OpenAPI spec
+- Make the code readable and maintainable for entry-level developers
+- Avoid complex or clever programming patterns
+- Include helpful comments where needed
+- Use True instead of true and False instead of false 
+- Be careful not to use string literals you see in the API spec in the code without double quotes
+
+API Integration:
+- Use the base URL from the OpenAPI spec or allow it to be configured via command line
+- Make actual HTTP requests to the API endpoints (not mock responses)
+- Handle HTTP errors gracefully and return meaningful error messages
+- Implement authentication based on the OpenAPI security schemes:
+  * For Bearer/JWT tokens: Add Authorization header "Bearer {token}" using environment variable
+  * For API keys: Add appropriate header or query parameter using environment variable
+  * For Basic auth: Add Authorization header "Basic {base64_credentials}" using environment variables
+  * Use environment variable names based on security scheme names (e.g., MISSION_AUTH_TOKEN for missionAuth)
+- Include authentication headers in ALL HTTP requests when security is defined
+- Support different content types as specified in the OpenAPI spec
+
+Make sure the generated code follows all the patterns shown in the example currenttime server while adapting to the specific API defined in the OpenAPI specification.
+</instructions>
+
+Please provide only the Python code without any markdown formatting or additional explanation.

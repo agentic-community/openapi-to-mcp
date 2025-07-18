@@ -1,0 +1,575 @@
+You are an expert software developer who writes simple, performant code for MCP (Model Context Protocol) clients. You create clean, maintainable code that entry-level developers can understand and maintain over the years.
+
+<task>
+Generate a complete MCP client implementation in Python that connects to an MCP server, lists all available tools, and systematically calls each tool based on the tool specifications provided. The client should demonstrate how to interact with each tool using appropriate parameters.
+</task>
+
+<requirements>
+1. Use the MCP Python SDK with proper imports and setup
+2. Include comprehensive error handling and logging
+3. Follow the logging configuration format: logging.basicConfig(level=logging.INFO, format="%(asctime)s,p%(process)s,{%(filename)s:%(lineno)d},%(levelname)s,%(message)s")
+4. Include command line argument parsing for server connection details (URL for SSE, command for stdio)
+5. Connect to the MCP server using SSE transport by default (with stdio as fallback option)
+6. List all available tools from the server
+7. For each tool, call it with appropriate parameters based on the tool specification
+8. Include proper type annotations with Pydantic where applicable
+9. Use simple, readable code that avoids clever programming tricks
+10. Include comprehensive docstrings for all functions
+11. Handle both required and optional parameters correctly
+12. Return structured responses and log the results
+13. Include graceful connection handling and cleanup
+14. Support different parameter types (string, number, boolean, arrays, objects)
+</requirements>
+
+<example_mcp_client>
+"""
+This client connects to an MCP server via SSE transport and demonstrates how to interact with all available tools.
+"""
+
+import os
+import json
+import asyncio
+import logging
+import argparse
+from typing import Any, Dict, List, Optional
+from pathlib import Path
+from fastmcp import Client
+from pydantic import BaseModel, Field
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s,p%(process)s,{%(filename)s:%(lineno)d},%(levelname)s,%(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+def _parse_arguments():
+    """Parse command line arguments for MCP server connection."""
+    parser = argparse.ArgumentParser(description="MCP Client for Testing Server Tools")
+    
+    parser.add_argument(
+        "--server-url",
+        type=str,
+        default=os.environ.get("MCP_SERVER_URL", "http://localhost:9000/sse"),
+        help="URL of the MCP server SSE endpoint (default: http://localhost:9000/sse)",
+    )
+    
+    parser.add_argument(
+        "--transport",
+        type=str,
+        choices=["sse", "stdio"],
+        default="sse",
+        help="Transport method to use (default: sse)",
+    )
+    
+    parser.add_argument(
+        "--server-command",
+        type=str,
+        default="python server.py",
+        help="Command to start the MCP server (only used with stdio transport)",
+    )
+    
+    parser.add_argument(
+        "--server-args", 
+        nargs="*",
+        default=[],
+        help="Additional arguments for the server command (only used with stdio transport)",
+    )
+    
+    parser.add_argument(
+        "--output-file",
+        type=str,
+        default="client_results.json",
+        help="File to save client interaction results (default: client_results.json)",
+    )
+    
+    return parser.parse_args()
+
+
+def _get_client(
+    transport: str,
+    server_url: Optional[str] = None,
+    server_command: Optional[str] = None,
+    server_args: Optional[List[str]] = None
+) -> Client:
+    """
+    Create a FastMCP client for the specified transport method.
+    
+    Args:
+        transport: Transport method to use ("sse" or "stdio")
+        server_url: URL for SSE transport
+        server_command: Command to start the server for stdio transport
+        server_args: Additional arguments for the server command for stdio transport
+        
+    Returns:
+        FastMCP Client instance
+        
+    Raises:
+        Exception: If client creation fails
+    """
+    try:
+        if transport == "sse":
+            if not server_url:
+                raise ValueError("server_url is required for SSE transport")
+            
+            logger.info(f"Creating client for SSE connection to: {server_url}")
+            return Client(server_url)
+            
+        elif transport == "stdio":
+            if not server_command:
+                raise ValueError("server_command is required for stdio transport")
+            
+            # Build command with args for stdio transport
+            if server_args:
+                command_with_args = f"{server_command} {' '.join(server_args)}"
+            else:
+                command_with_args = server_command
+            
+            logger.info(f"Creating client for stdio command: {command_with_args}")
+            return Client(command_with_args)
+            
+        else:
+            raise ValueError(f"Unsupported transport method: {transport}")
+        
+    except Exception as e:
+        logger.error(f"Failed to create client: {e}")
+        raise
+
+
+async def _list_tools(client: Client):
+    """
+    List and display all available tools from the MCP server as JSON.
+    
+    Args:
+        client: Connected FastMCP client
+    """
+    try:
+        logger.info("Requesting list of available tools")
+        tools_response = await client.list_tools()
+        
+        # Debug the response structure
+        logger.info(f"Raw tools_response type: {type(tools_response)}")
+        logger.info(f"Raw tools_response: {tools_response}")
+        
+        # Handle different response formats from fastmcp
+        if hasattr(tools_response, 'tools'):
+            tools = tools_response.tools
+            logger.info(f"Found tools attribute with {len(tools)} tools")
+        elif isinstance(tools_response, list):
+            tools = tools_response
+            logger.info(f"Response is list with {len(tools)} tools")
+        else:
+            # Fallback: try to extract tools from response
+            tools = getattr(tools_response, 'tools', tools_response)
+            logger.info(f"Fallback extraction: {type(tools)}")
+        
+        if not tools:
+            logger.warning("No tools found in response")
+            print("\n📋 Available Tools: []")
+            return
+        
+        # Convert tools to JSON-serializable format
+        tools_json = []
+        for tool in tools:
+            try:
+                if hasattr(tool, 'model_dump'):
+                    tool_dict = tool.model_dump()
+                elif hasattr(tool, 'dict'):
+                    tool_dict = tool.dict()
+                elif isinstance(tool, dict):
+                    tool_dict = tool
+                else:
+                    # Fallback: try to extract attributes
+                    tool_dict = {
+                        'name': getattr(tool, 'name', str(tool)),
+                        'description': getattr(tool, 'description', ''),
+                        'inputSchema': getattr(tool, 'inputSchema', {})
+                    }
+                tools_json.append(tool_dict)
+                logger.info(f"Processed tool: {tool_dict.get('name', 'Unknown')}")
+            except Exception as e:
+                logger.error(f"Error processing tool {tool}: {e}")
+        
+        # Display tools as formatted JSON
+        print(f"\n📋 Available Tools ({len(tools_json)} found):")
+        print(json.dumps(tools_json, indent=2))
+        
+        return tools_json
+        
+    except Exception as e:
+        logger.error(f"Failed to list tools: {e}")
+        print(f"\n❌ Error listing tools: {e}")
+        return []
+
+
+async def _list_available_tools(client: Client) -> List[Dict[str, Any]]:
+    """
+    List all available tools from the MCP server.
+    
+    Args:
+        client: Connected FastMCP client
+        
+    Returns:
+        List of tool definitions
+        
+    Raises:
+        Exception: If listing tools fails
+    """
+    try:
+        logger.info("Requesting list of available tools")
+        tools_response = await client.list_tools()
+        
+        # Debug the response structure
+        logger.info(f"Raw tools_response type: {type(tools_response)}")
+        logger.info(f"Raw tools_response: {tools_response}")
+        
+        # Handle different response formats from fastmcp
+        if hasattr(tools_response, 'tools'):
+            tools = tools_response.tools
+        elif isinstance(tools_response, list):
+            tools = tools_response
+        else:
+            # Fallback: try to extract tools from response
+            tools = getattr(tools_response, 'tools', tools_response)
+        
+        logger.info(f"Found {len(tools)} available tools")
+        for tool in tools:
+            tool_name = tool.name if hasattr(tool, 'name') else tool.get('name', 'Unknown')
+            tool_desc = tool.description if hasattr(tool, 'description') else tool.get('description', 'No description')
+            logger.info(f"Tool: {tool_name} - {tool_desc}")
+        
+        # Convert tools to dictionaries
+        result_tools = []
+        for tool in tools:
+            if hasattr(tool, 'model_dump'):
+                result_tools.append(tool.model_dump())
+            elif hasattr(tool, 'dict'):
+                result_tools.append(tool.dict())
+            elif isinstance(tool, dict):
+                result_tools.append(tool)
+            else:
+                # Fallback: try to convert to dict
+                result_tools.append({
+                    'name': getattr(tool, 'name', str(tool)),
+                    'description': getattr(tool, 'description', ''),
+                    'inputSchema': getattr(tool, 'inputSchema', {})
+                })
+        
+        return result_tools
+        
+    except Exception as e:
+        logger.error(f"Failed to list tools: {e}")
+        raise
+
+
+def _generate_sample_parameters(tool_schema: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Generate sample parameters for a tool based on its input schema.
+    
+    Args:
+        tool_schema: Tool's input schema definition
+        
+    Returns:
+        Dictionary of sample parameters
+    """
+    if not tool_schema or "properties" not in tool_schema:
+        return {}
+    
+    sample_params = {}
+    properties = tool_schema["properties"]
+    required_fields = tool_schema.get("required", [])
+    
+    for param_name, param_def in properties.items():
+        param_type = param_def.get("type", "string")
+        default_value = param_def.get("default")
+        
+        if default_value is not None:
+            sample_params[param_name] = default_value
+        elif param_type == "string":
+            sample_params[param_name] = param_def.get("example", "sample_string")
+        elif param_type == "integer":
+            sample_params[param_name] = param_def.get("example", 42)
+        elif param_type == "number":
+            sample_params[param_name] = param_def.get("example", 3.14)
+        elif param_type == "boolean":
+            sample_params[param_name] = param_def.get("example", True)
+        elif param_type == "array":
+            sample_params[param_name] = param_def.get("example", ["sample_item"])
+        elif param_type == "object":
+            sample_params[param_name] = param_def.get("example", {})
+        else:
+            sample_params[param_name] = "sample_value"
+    
+    # Only include required parameters by default, but add some optional ones for demonstration
+    if required_fields:
+        filtered_params = {k: v for k, v in sample_params.items() if k in required_fields}
+        # Add first optional parameter if available
+        optional_params = {k: v for k, v in sample_params.items() if k not in required_fields}
+        if optional_params:
+            first_optional = next(iter(optional_params.items()))
+            filtered_params[first_optional[0]] = first_optional[1]
+        return filtered_params
+    
+    return sample_params
+
+
+async def _call_tool(client: Client, tool_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Call a specific tool with the provided parameters.
+    
+    Args:
+        client: Connected FastMCP client
+        tool_name: Name of the tool to call
+        parameters: Parameters to pass to the tool
+        
+    Returns:
+        Tool execution result
+        
+    Raises:
+        Exception: If tool call fails
+    """
+    try:
+        logger.info(f"Calling tool '{tool_name}' with parameters: {json.dumps(parameters, indent=2)}")
+        
+        result = await client.call_tool(tool_name, arguments=parameters)
+        
+        # Debug the response structure
+        logger.info(f"Raw result type: {type(result)}")
+        logger.info(f"Raw result: {result}")
+        
+        # Extract text content from result with compatibility handling
+        result_content = []
+        
+        # Handle different response formats from fastmcp
+        if hasattr(result, 'content'):
+            # Traditional format: result has .content attribute
+            content_items = result.content
+        elif isinstance(result, list):
+            # New format: result is directly a list of content items
+            content_items = result
+        else:
+            # Fallback: try to extract content or use result directly
+            content_items = getattr(result, 'content', [result])
+        
+        # Process content items
+        for content_item in content_items:
+            if hasattr(content_item, 'text'):
+                result_content.append(content_item.text)
+            elif isinstance(content_item, dict) and 'text' in content_item:
+                result_content.append(content_item['text'])
+            elif isinstance(content_item, str):
+                result_content.append(content_item)
+            else:
+                result_content.append(str(content_item))
+        
+        response = {
+            "tool_name": tool_name,
+            "parameters": parameters,
+            "success": True,
+            "result": result_content,
+            "is_error": result.isError if hasattr(result, 'isError') else False
+        }
+        
+        # Print the response for user visibility
+        print(f"\n🔧 Tool: {tool_name}")
+        print(f"📝 Parameters: {json.dumps(parameters, indent=2)}")
+        print(f"✅ Status: SUCCESS")
+        print(f"📋 Response:")
+        if isinstance(result_content, (dict, list)):
+            print(json.dumps(result_content, indent=2))
+        else:
+            print(f"   {result_content}")
+        print("-" * 60)
+        
+        logger.info(f"Tool '{tool_name}' executed successfully")
+        logger.info(f"Result: {result_content}")
+        
+        return response
+        
+    except Exception as e:
+        logger.error(f"Failed to call tool '{tool_name}': {e}")
+        
+        response = {
+            "tool_name": tool_name,
+            "parameters": parameters,
+            "success": False,
+            "error": str(e),
+            "result": None
+        }
+        
+        # Print the error response for user visibility
+        print(f"\n🔧 Tool: {tool_name}")
+        print(f"📝 Parameters: {json.dumps(parameters, indent=2)}")
+        print(f"❌ Status: FAILED")
+        print(f"🚨 Error: {str(e)}")
+        print("-" * 60)
+        
+        return response
+
+
+async def _test_all_tools(client: Client, tools: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Test all available tools by calling them with sample parameters.
+    
+    Args:
+        client: Connected FastMCP client
+        tools: List of tool definitions
+        
+    Returns:
+        List of tool execution results
+    """
+    results = []
+    
+    for tool in tools:
+        tool_name = tool["name"]
+        tool_description = tool.get("description", "No description")
+        input_schema = tool.get("inputSchema", {})
+        
+        logger.info(f"Testing tool: {tool_name}")
+        logger.info(f"Description: {tool_description}")
+        
+        # Generate sample parameters based on the tool's schema
+        sample_params = _generate_sample_parameters(input_schema)
+        
+        # Call the tool
+        result = await _call_tool(client, tool_name, sample_params)
+        results.append(result)
+        
+        # Add a small delay between tool calls
+        await asyncio.sleep(0.5)
+    
+    return results
+
+
+def _save_results(results: List[Dict[str, Any]], output_file: str):
+    """
+    Save the tool execution results to a JSON file.
+    
+    Args:
+        results: List of tool execution results
+        output_file: Path to the output file
+    """
+    try:
+        # Create output file path in the same directory as this script
+        script_dir = Path(__file__).parent
+        if not os.path.isabs(output_file):
+            output_path = script_dir / output_file
+        else:
+            output_path = Path(output_file)
+        
+        with open(output_path, 'w') as f:
+            json.dump(results, f, indent=2, default=str)
+        logger.info(f"Results saved to {output_path}")
+    except Exception as e:
+        logger.error(f"Failed to save results: {e}")
+
+
+async def main():
+    """Main function to run the MCP client."""
+    args = _parse_arguments()
+    
+    try:
+        # Create FastMCP client
+        client = _get_client(
+            transport=args.transport,
+            server_url=args.server_url,
+            server_command=args.server_command,
+            server_args=args.server_args
+        )
+        
+        async with client:
+            logger.info("Connected to MCP server")
+            
+            # List and display tools as JSON
+            await _list_tools(client)
+            
+            # List available tools
+            tools = await _list_available_tools(client)
+            
+            if not tools:
+                logger.warning("No tools available on the server")
+                return
+            
+            # Test all tools
+            results = await _test_all_tools(client, tools)
+            
+            # Save results
+            _save_results(results, args.output_file)
+            
+            # Summary
+            successful_calls = sum(1 for r in results if r["success"])
+            failed_calls = len(results) - successful_calls
+            
+            logger.info(f"Client execution completed:")
+            logger.info(f"  Total tools tested: {len(results)}")
+            logger.info(f"  Successful calls: {successful_calls}")
+            logger.info(f"  Failed calls: {failed_calls}")
+        
+    except Exception as e:
+        logger.error(f"Client execution failed: {e}")
+        raise
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+</example_mcp_client>
+
+<tool_specifications>
+{tool_specifications}
+</tool_specifications>
+
+<instructions>
+Generate a complete MCP client that:
+1. Imports all necessary dependencies (os, json, asyncio, logging, argparse, typing, mcp client libraries, pydantic)
+2. Sets up logging using the required format exactly as shown in the example
+3. Includes argument parsing for server connection details with proper defaults from environment variables
+4. Connects to the MCP server using SSE transport by default (with stdio as fallback option)
+5. Lists all available tools from the server and logs their details
+6. For each tool in the tool specifications, calls it with appropriate parameters based on the schema
+7. Generates realistic sample parameters for each tool based on their input schemas
+8. Handles different parameter types (strings, numbers, booleans, arrays, objects) correctly
+9. Includes proper error handling with try/catch blocks and comprehensive logging
+10. Returns and logs structured responses from each tool call
+11. Saves all results to a JSON file for later analysis
+12. Includes graceful connection handling and cleanup
+13. Has a main() function that orchestrates the entire client workflow
+
+Code structure:
+- Use descriptive function names that clearly indicate their purpose
+- Include comprehensive docstrings for all functions
+- Use proper type hints with typing annotations
+- Handle both required and optional parameters correctly
+- Make the code readable and maintainable for entry-level developers
+- Avoid complex or clever programming patterns
+- Include helpful comments where needed
+- Use private functions (starting with _) for internal functionality
+
+Tool Parameter Generation:
+- Analyze each tool's input schema to understand required and optional parameters
+- Generate realistic sample values based on parameter types and constraints
+- Use default values when specified in the schema
+- Use example values when provided in the schema
+- For required parameters, always provide values
+- For optional parameters, include some in the test calls to demonstrate functionality
+- Handle nested objects and arrays appropriately
+- Log the parameters being used for each tool call
+
+Error Handling:
+- Wrap all MCP operations in try/catch blocks
+- Log detailed error information when tool calls fail
+- Continue testing other tools even if one fails
+- Provide meaningful error messages for debugging
+- Handle connection errors gracefully
+
+Results Management:
+- Collect results from all tool calls
+- Include both successful and failed call details
+- Save results in a structured JSON format
+- Provide summary statistics of the test run
+- Log progress and results for easy monitoring
+
+Based on the tool specifications provided, customize the parameter generation and tool calling logic to match the specific tools available on the target MCP server. The client should be able to thoroughly test all functionality exposed by the server.
+</instructions>
+
+Please provide only the Python code without any markdown formatting or additional explanation. 

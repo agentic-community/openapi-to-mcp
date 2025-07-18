@@ -1,0 +1,17 @@
+# LLM Model Configuration
+#model: bedrock/us.anthropic.claude-3-5-sonnet-20241022-v2:0
+model: anthropic/claude-sonnet-4-20250514 #anthropic/claude-3-7-sonnet-latest
+# Model Parameters
+max_tokens: 16384
+temperature: 0.1
+timeout_seconds: 300
+debug: false
+
+# Evaluation Thresholds
+good_evaluation_threshold: 3.0  # Minimum score for "good" evaluation
+generate_mcp_threshold: 3.0     # Minimum score to generate MCP server
+
+# Directory Configuration
+temp_dir: ./temp
+templates_dir: ./templates
+output_dir: ./output

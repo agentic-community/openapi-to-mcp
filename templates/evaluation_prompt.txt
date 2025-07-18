@@ -1,0 +1,167 @@
+You are an expert in API design and OpenAPI specifications. Your task is to evaluate an OpenAPI specification for its completeness, clarity, and AI readiness. Provide detailed feedback and suggestions for improvement.
+
+<evaluation_criteria>
+Assess the specification across these dimensions:
+
+### 1. API Information
+- **API Title**: Clear and descriptive
+- **Version**: Properly versioned
+- **Description**: Comprehensive overview of API purpose and functionality
+- **Contact/License**: Proper metadata included
+
+### 2. Operations Analysis
+For each endpoint, evaluate:
+- **Description Quality**: Clear, detailed descriptions explaining purpose and functionality
+- **Parameter Documentation**: Complete parameter descriptions with types, constraints, and examples
+- **Request Body**: Well-defined schemas with examples where applicable  
+- **Response Documentation**: Complete response schemas for all status codes with examples
+- **Error Handling**: Proper error response documentation (4xx, 5xx)
+
+### 3. Schema Definitions
+- **Model Completeness**: All referenced schemas are defined
+- **Property Documentation**: Each property has clear descriptions
+- **Examples**: Realistic examples provided for schemas
+- **Required Fields**: Clearly specified required vs optional fields
+- **Data Types**: Appropriate and specific data types used
+
+### 4. Security
+- **Security Schemes**: Properly defined authentication methods
+- **Security Requirements**: Clear specification of which operations require which security
+- **Security Documentation**: Clear explanation of how to authenticate
+
+### 5. AI/LLM Readiness
+- **Context Richness**: Sufficient detail for AI to understand API functionality
+- **Example Completeness**: Enough examples for AI to generate proper requests
+- **Error Context**: Clear error handling for AI debugging
+- **Operational Clarity**: Unambiguous operation descriptions
+</evaluation_criteria>
+
+<output_format>
+## JSON Evaluation Structure
+
+Provide your evaluation as a JSON object.
+
+```json
+{
+  "evaluation_id": "unique-evaluation-id",
+  "api_title": "API Name from spec",
+  "api_version": "Version from spec", 
+  "openapi_version": "OpenAPI version used",
+  "evaluation_timestamp": "ISO timestamp",
+  "security_schemes": [
+    {
+      "type": "security type",
+      "name": "scheme name",
+      "description": "security description",
+      "required": true/false
+    }
+  ],
+  "operations": [
+    {
+      "operation_id": "operationId or null",
+      "method": "HTTP method",
+      "path": "API path",
+      "summary": "operation summary",
+      "description": "operation description",
+      "description_quality": "excellent|good|fair|poor|missing",
+      "parameter_completeness": "excellent|good|fair|poor|missing",
+      "response_completeness": "excellent|good|fair|poor|missing",
+      "parameters": [
+        {
+          "name": "parameter name",
+          "location": "query|path|header|cookie",
+          "description_quality": "excellent|good|fair|poor|missing",
+          "example_provided": true/false,
+          "constraints_defined": true/false,
+          "suggestions": ["improvement suggestions"]
+        }
+      ],
+      "responses": [
+        {
+          "status_code": "200|400|etc",
+          "description_quality": "excellent|good|fair|poor|missing",
+          "schema_provided": true/false,
+          "examples_provided": true/false,
+          "headers_documented": true/false,
+          "suggestions": ["improvement suggestions"]
+        }
+      ],
+      "missing_parameters": ["suggested missing parameters"],
+      "missing_responses": ["suggested missing response codes"],
+      "enhancement_suggestions": ["general enhancement suggestions"]
+    }
+  ],
+  "schemas": [
+    {
+      "schema_name": "Schema name",
+      "description_quality": "excellent|good|fair|poor|missing",
+      "properties_documented": true/false,
+      "examples_provided": true/false,
+      "required_fields_specified": true/false,
+      "suggestions": ["improvement suggestions"]
+    }
+  ],
+  "overall": {
+    "overall_quality": "excellent|good|fair|poor",
+    "completeness_score": 1-5,
+    "ai_readiness_score": 1-5,
+    "has_comprehensive_descriptions": true/false,
+    "has_good_examples": true/false,
+    "has_proper_error_handling": true/false,
+    "security_well_defined": true/false,
+    "major_improvements_needed": ["list of major improvements"],
+    "minor_improvements_suggested": ["list of minor improvements"]
+  },
+  "needs_enhancement": true/false,
+  "enhancement_priority": "low|medium|high|critical"
+}
+```
+
+
+</output_format>
+
+<scoring_guidelines>
+## Scoring Scale
+
+### Completeness Score (1-5 Likert Scale)
+- **5 (Excellent)**: All endpoints, schemas, and responses are thoroughly documented with comprehensive details
+- **4 (Good)**: Most elements are well documented with minor gaps
+- **3 (Fair)**: Basic documentation present but lacks detail in several areas
+- **2 (Poor)**: Minimal documentation with significant gaps
+- **1 (Worst)**: Very incomplete documentation, major elements missing
+
+### AI Readiness Score (1-5 Likert Scale)
+- **5 (Excellent)**: Perfect for AI consumption - rich context, examples, clear descriptions, unambiguous operations
+- **4 (Good)**: Good AI readiness with minor areas for improvement
+- **3 (Fair)**: Adequate for AI but missing some context or examples
+- **2 (Poor)**: Limited AI readiness, lacks sufficient context or examples
+- **1 (Worst)**: Poor AI readiness, ambiguous descriptions, no examples
+</scoring_guidelines>
+
+
+
+<guidelines>
+## Guidelines
+
+1. **Be Specific**: Provide concrete, actionable feedback
+2. **Focus on AI Usability**: Consider how well an AI system could understand and use this API
+3. **Prioritize Issues**: Distinguish between critical missing elements and nice-to-have improvements
+4. **Provide Examples**: When suggesting improvements, provide specific examples where helpful
+5. **Consider Real-World Usage**: Think about practical API consumption scenarios
+</guidelines>
+
+<response_format_instructions>
+## Important Response Format
+
+Provide the complete JSON evaluation following the exact structure above.
+</response_format_instructions>
+
+<input_section>
+## Input
+
+The OpenAPI specification to evaluate will be provided below. Analyze it thoroughly and provide your evaluation in the requested JSON format.
+</input_section>
+
+<openapi_specification>
+{{openapi_spec}}
+</openapi_specification> 

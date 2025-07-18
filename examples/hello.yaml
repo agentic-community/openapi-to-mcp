@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Hello World API
+  version: 1.0.0
+  description: A simple Hello World API
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /hello/{name}:
+    get:
+      summary: Get a personalized greeting
+      description: Returns a greeting message for the specified name
+      operationId: getHello
+      tags:
+        - greetings
+      parameters:
+        - name: name
+          in: path
+          required: true
+          description: The name to greet
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 50
+          example: "John"
+      responses:
+        '200':
+          description: Greeting message
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Hello, John!"
+        '400':
+          description: Bad request - invalid name parameter
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Name must be between 1 and 50 characters"
+
+tags:
+  - name: greetings
+    description: Simple greeting operations
