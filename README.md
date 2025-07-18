@@ -143,12 +143,24 @@ git clone https://github.com/agentic-community/openapi-to-mcp.git
 cd openapi-to-mcp
 ```
 
-2. Install dependencies using uv:
+2. Create and activate a virtual environment:
+```bash
+# Create virtual environment
+uv venv
+
+# Activate on macOS/Linux
+source .venv/bin/activate
+
+# Activate on Windows
+.venv\Scripts\activate
+```
+
+3. Install dependencies using uv:
 ```bash
 uv pip install -e .
 ```
 
-3. Set up your environment variables:
+4. Set up your environment variables:
 ```bash
 cp env.example .env
 # Edit .env with your API credentials
