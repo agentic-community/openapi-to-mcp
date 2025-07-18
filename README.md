@@ -290,7 +290,26 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 
 ## Security
 
-See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for information on reporting security issues.
+### Security Best Practices
+
+When using this tool, please follow these security guidelines:
+
+1. **Sensitive Data in OpenAPI Specs**: Ensure that your OpenAPI specifications do not contain sensitive data such as real API keys, passwords, or personally identifiable information (PII) when testing with cloud-based LLM providers.
+
+2. **Use Local Models for Sensitive Data**: If your OpenAPI specifications contain sensitive information, consider using locally hosted LLM models instead of cloud-based providers to maintain data privacy.
+
+3. **Security Testing of Generated Code**: Always thoroughly review and test the generated MCP server code for security vulnerabilities before deploying to production. This includes:
+   - Input validation and sanitization
+   - Authentication and authorization checks
+   - Rate limiting and abuse prevention
+   - Secure handling of API credentials
+   - Protection against common vulnerabilities (injection attacks, XSS, etc.)
+
+4. **Environment Variables**: Never commit `.env` files or expose API credentials in your code repository. Use secure credential management practices.
+
+### Reporting Security Issues
+
+See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for information on reporting security vulnerabilities in this project.
 
 ## License
 
