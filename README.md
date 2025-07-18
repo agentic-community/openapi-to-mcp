@@ -120,6 +120,21 @@ The generated package includes all necessary dependency files, comprehensive doc
 
 ## Installation
 
+### Installing uv
+
+First, install the uv package manager if you haven't already:
+
+```bash
+# On macOS and Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# On Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or using pip
+pip install uv
+```
+
 ### Quick Install
 
 1. Clone the repository:
