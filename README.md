@@ -16,6 +16,7 @@
 ## Table of Contents
 
 - [What's New](#whats-new)
+- [Why This Solution](#why-this-solution)
 - [Architecture](#architecture)
 - [Features](#features)
 - [Prerequisites](#prerequisites)
@@ -41,6 +42,22 @@
 - Automatic MCP server and client generation
 - Support for Amazon Bedrock and Anthropic Claude
 - Comprehensive evaluation reports with usage tracking
+
+## Why This Solution
+
+As enterprises transition towards being AI-ready, a critical piece of the puzzle is ensuring their APIs are AI-ready as well. API specifications that were written for human consumption often lack the level of detail that Large Language Models require for reliable operation. While human developers can rely on domain expertise and tribal knowledge to fill in documentation gaps, LLMs may hallucinate missing information, leading to AI agents that cannot reliably invoke the right tools at the right time.
+
+Common issues in human-oriented API documentation that impact AI readiness include:
+
+- **Missing or vague descriptions**: Endpoints and parameters that lack detailed explanations of their purpose and behavior
+- **Undefined parameter constraints**: Parameters without clearly defined ranges, formats, or validation rules
+- **Incomplete error handling**: Missing documentation for error responses and edge cases
+- **Unclear data relationships**: Lack of explicit documentation about how different API resources relate to each other
+- **Missing pagination details**: APIs that handle large datasets but don't clearly document pagination mechanisms
+- **Ambiguous filtering options**: Query parameters for filtering that lack comprehensive documentation
+- **Implicit business logic**: Assumptions about workflow and usage patterns that aren't explicitly documented
+
+When these incomplete API specifications are directly converted to MCP servers, the resulting tool specifications inherit the same deficiencies. This leads to unpredictable behavior that may be sub-optimal at best and completely broken at worst. The OpenAPI to MCP Converter addresses this gap by using AI to analyze, evaluate, and enhance your API specifications before generating MCP servers, ensuring they meet the quality standards required for reliable AI agent operation.
 
 ## Architecture
 
