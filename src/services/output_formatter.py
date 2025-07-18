@@ -39,7 +39,7 @@ def _check_mcp_generation_criteria(evaluation, generate_threshold: float = 3.0) 
 def _display_evaluation_results(evaluation) -> None:
     """Display evaluation results to console."""
     print(f"\n📊 EVALUATION RESULTS")
-    print(f"📋 API Title: {evaluation.api_title}")
+    print(f"API Title: {evaluation.api_title}")
     print(f"⭐ Overall Quality: {evaluation.overall.overall_quality.value.upper()}")
     print(f"📊 Completeness Score: {evaluation.overall.completeness_score}/5")
     print(f"🤖 AI Readiness Score: {evaluation.overall.ai_readiness_score}/5")
@@ -61,7 +61,7 @@ def _print_results_summary(
     """
     try:
         print(f"\n{'='*80}")
-        print(f"📋 EVALUATION SUMMARY")
+        print(f"EVALUATION SUMMARY")
         print(f"{'='*80}")
         print(f"📁 Results Directory: {output_config.get_results_dir()}")
         print(f"🤖 Model: {evaluation.model}")
@@ -89,12 +89,12 @@ def _print_results_summary(
         # MCP Generation Status
         print(f"\n🚀 MCP GENERATION:")
         if mcpserver_path:
-            print(f"   ✅ MCP server generated: {mcpserver_path}")
+            print(f"   [SUCCESS] MCP server generated: {mcpserver_path}")
             print(f"   📝 Test with: cd {mcpserver_path} && python client.py")
         else:
             meets_criteria = _check_mcp_generation_criteria(evaluation, generate_threshold)
             if not meets_criteria:
-                print(f"   ❌ Criteria not met (need ≥{generate_threshold} for both completeness and AI readiness)")
+                print(f"   [FAILED] Criteria not met (need >={generate_threshold} for both completeness and AI readiness)")
             else:
                 print(f"   ⚠️  Generation failed (check logs)")
         
@@ -103,7 +103,7 @@ def _print_results_summary(
         print(f"   📊 Evaluation: {eval_file}")
         print(f"   📄 Summary: {summary_file}")
         print(f"   📝 Enhanced Spec: {enhanced_file}")
-        print(f"   📋 Original Spec: {original_file}")
+        print(f"   Original Spec: {original_file}")
         
         print(f"\n💡 QUICK ACTIONS:")
         print(f"   View summary: cat {summary_file}")
@@ -189,11 +189,11 @@ if __name__ == "__main__":
     
     # Final validation result
     if all_validation_failures:
-        print(f"❌ VALIDATION FAILED - {len(all_validation_failures)} of {total_tests} tests failed:")
+        print(f"[FAILED] VALIDATION FAILED - {len(all_validation_failures)} of {total_tests} tests failed:")
         for failure in all_validation_failures:
             print(f"  - {failure}")
         sys.exit(1)
     else:
-        print(f"✅ VALIDATION PASSED - All {total_tests} tests produced expected results")
+        print(f"[PASSED] VALIDATION PASSED - All {total_tests} tests produced expected results")
         print("Output formatter functions are validated and ready for use")
         sys.exit(0)

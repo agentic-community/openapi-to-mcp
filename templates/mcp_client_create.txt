@@ -9,7 +9,7 @@ Generate a complete MCP client implementation in Python that connects to an MCP 
 2. Include comprehensive error handling and logging
 3. Follow the logging configuration format: logging.basicConfig(level=logging.INFO, format="%(asctime)s,p%(process)s,{%(filename)s:%(lineno)d},%(levelname)s,%(message)s")
 4. Include command line argument parsing for server connection details (URL for SSE, command for stdio)
-5. Connect to the MCP server using SSE transport by default (with stdio as fallback option)
+5. Connect to the MCP server using streamable-http transport by default (with SSE as fallback option)
 6. List all available tools from the server
 7. For each tool, call it with appropriate parameters based on the tool specification
 8. Include proper type annotations with Pydantic where applicable
@@ -23,7 +23,7 @@ Generate a complete MCP client implementation in Python that connects to an MCP 
 
 <example_mcp_client>
 """
-This client connects to an MCP server via SSE transport and demonstrates how to interact with all available tools.
+This client connects to an MCP server via streamable-http transport and demonstrates how to interact with all available tools.
 """
 
 import os
@@ -33,8 +33,8 @@ import logging
 import argparse
 from typing import Any, Dict, List, Optional
 from pathlib import Path
-from fastmcp import Client
-from pydantic import BaseModel, Field
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
 
 # Configure logging
 logging.basicConfig(
@@ -51,16 +51,16 @@ def _parse_arguments():
     parser.add_argument(
         "--server-url",
         type=str,
-        default=os.environ.get("MCP_SERVER_URL", "http://localhost:9000/sse"),
-        help="URL of the MCP server SSE endpoint (default: http://localhost:9000/sse)",
+        default=os.environ.get("MCP_SERVER_URL", "http://localhost:8000/api"),
+        help="URL of the MCP server endpoint (default: http://localhost:8000/api)",
     )
     
     parser.add_argument(
         "--transport",
         type=str,
-        choices=["sse", "stdio"],
-        default="sse",
-        help="Transport method to use (default: sse)",
+        choices=["streamable-http"],
+        default="streamable-http",
+        help="Transport method to use (default: streamable-http)",
     )
     
     parser.add_argument(
@@ -87,53 +87,34 @@ def _parse_arguments():
     return parser.parse_args()
 
 
-def _get_client(
-    transport: str,
-    server_url: Optional[str] = None,
-    server_command: Optional[str] = None,
-    server_args: Optional[List[str]] = None
-) -> Client:
+async def _connect_to_server(
+    server_url: str
+):
     """
-    Create a FastMCP client for the specified transport method.
+    Connect to MCP server using streamable-http transport.
     
     Args:
-        transport: Transport method to use ("sse" or "stdio")
-        server_url: URL for SSE transport
-        server_command: Command to start the server for stdio transport
-        server_args: Additional arguments for the server command for stdio transport
+        server_url: URL for streamable-http transport
         
     Returns:
-        FastMCP Client instance
+        ClientSession instance
         
     Raises:
-        Exception: If client creation fails
+        Exception: If connection fails
     """
     try:
-        if transport == "sse":
-            if not server_url:
-                raise ValueError("server_url is required for SSE transport")
-            
-            logger.info(f"Creating client for SSE connection to: {server_url}")
-            return Client(server_url)
-            
-        elif transport == "stdio":
-            if not server_command:
-                raise ValueError("server_command is required for stdio transport")
-            
-            # Build command with args for stdio transport
-            if server_args:
-                command_with_args = f"{server_command} {' '.join(server_args)}"
-            else:
-                command_with_args = server_command
-            
-            logger.info(f"Creating client for stdio command: {command_with_args}")
-            return Client(command_with_args)
-            
-        else:
-            raise ValueError(f"Unsupported transport method: {transport}")
+        if not server_url:
+            raise ValueError("server_url is required for streamable-http transport")
+        
+        logger.info(f"Connecting via streamable-http to: {server_url}")
+        async with streamablehttp_client(url=server_url) as (read, write, get_session_id):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                logger.info("Connected and initialized session successfully")
+                return session
         
     except Exception as e:
-        logger.error(f"Failed to create client: {e}")
+        logger.error(f"Failed to connect to server: {e}")
         raise
 
 
@@ -150,7 +131,21 @@ async def _list_tools(client: Client):
         
         # Debug the response structure
         logger.info(f"Raw tools_response type: {type(tools_response)}")
-        logger.info(f"Raw tools_response: {tools_response}")
+        # Pretty print tools response
+        try:
+            if hasattr(tools_response, 'model_dump'):
+                response_dict = tools_response.model_dump()
+            elif hasattr(tools_response, 'dict'):
+                response_dict = tools_response.dict()
+            elif isinstance(tools_response, dict):
+                response_dict = tools_response
+            elif isinstance(tools_response, list):
+                response_dict = {'tools': tools_response}
+            else:
+                response_dict = {'raw_response': str(tools_response)}
+            logger.info(f"Tools response: {json.dumps(response_dict, indent=2, default=str)}")
+        except Exception as e:
+            logger.info(f"Raw tools_response: {tools_response}")
         
         # Handle different response formats from fastmcp
         if hasattr(tools_response, 'tools'):
@@ -222,7 +217,21 @@ async def _list_available_tools(client: Client) -> List[Dict[str, Any]]:
         
         # Debug the response structure
         logger.info(f"Raw tools_response type: {type(tools_response)}")
-        logger.info(f"Raw tools_response: {tools_response}")
+        # Pretty print tools response
+        try:
+            if hasattr(tools_response, 'model_dump'):
+                response_dict = tools_response.model_dump()
+            elif hasattr(tools_response, 'dict'):
+                response_dict = tools_response.dict()
+            elif isinstance(tools_response, dict):
+                response_dict = tools_response
+            elif isinstance(tools_response, list):
+                response_dict = {'tools': tools_response}
+            else:
+                response_dict = {'raw_response': str(tools_response)}
+            logger.info(f"Tools response: {json.dumps(response_dict, indent=2, default=str)}")
+        except Exception as e:
+            logger.info(f"Raw tools_response: {tools_response}")
         
         # Handle different response formats from fastmcp
         if hasattr(tools_response, 'tools'):
@@ -234,6 +243,29 @@ async def _list_available_tools(client: Client) -> List[Dict[str, Any]]:
             tools = getattr(tools_response, 'tools', tools_response)
         
         logger.info(f"Found {len(tools)} available tools")
+        
+        # Pretty print individual tools
+        tools_info = []
+        for tool in tools:
+            if hasattr(tool, 'name'):
+                tool_info = {
+                    'name': tool.name,
+                    'description': getattr(tool, 'description', 'No description'),
+                    'inputSchema': getattr(tool, 'inputSchema', {})
+                }
+            elif isinstance(tool, dict):
+                tool_info = {
+                    'name': tool.get('name', 'Unknown'),
+                    'description': tool.get('description', 'No description'),
+                    'inputSchema': tool.get('inputSchema', {})
+                }
+            else:
+                tool_info = {'raw': str(tool)}
+            tools_info.append(tool_info)
+        
+        logger.info(f"Available tools: {json.dumps(tools_info, indent=2)}")
+        
+        # Also log individual tools for backward compatibility
         for tool in tools:
             tool_name = tool.name if hasattr(tool, 'name') else tool.get('name', 'Unknown')
             tool_desc = tool.description if hasattr(tool, 'description') else tool.get('description', 'No description')
@@ -465,49 +497,94 @@ def _save_results(results: List[Dict[str, Any]], output_file: str):
         logger.error(f"Failed to save results: {e}")
 
 
+async def _test_server(server_url: str, output_file: str):
+    """Test MCP server using streamable-http transport."""
+    print(f"\n🔍 Testing streamable-http transport")
+    print(f"📡 Connecting to endpoint: {server_url}")
+    
+    try:
+        async with streamablehttp_client(url=server_url) as (read, write, get_session_id):
+            print(f"  ✓ StreamableHTTP connection established")
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                print(f"  ✓ Session initialized successfully")
+                
+                # List tools
+                print(f"  🔧 Calling session.list_tools()...")
+                tools_result = await session.list_tools()
+                tools = tools_result.tools
+                print(f"  ✓ Found {len(tools)} tools")
+                
+                # Display tools
+                for tool in tools:
+                    print(f"    - {tool.name}: {tool.description}")
+                
+                # Test each tool with sample parameters
+                results = []
+                for tool in tools:
+                    try:
+                        tool_name = tool.name
+                        print(f"\n  🔧 Testing tool: {tool_name}")
+                        
+                        # Generate sample parameters based on tool schema
+                        sample_params = _generate_sample_parameters(tool.inputSchema)
+                        print(f"     Parameters: {json.dumps(sample_params, indent=2)}")
+                        
+                        # Call the tool - using exact pattern from reference implementation
+                        result = await session.call_tool(tool_name, arguments=sample_params)
+                        
+                        # Extract result text properly handling different response formats
+                        if result.content and len(result.content) > 0:
+                            result_text = result.content[0].text
+                        else:
+                            result_text = "No content returned"
+                        
+                        print(f"     ✅ Success: {result_text}")
+                        
+                        results.append({
+                            "tool_name": tool_name,
+                            "parameters": sample_params,
+                            "success": True,
+                            "result": result_text,
+                            "content": [{"text": content.text} for content in result.content] if result.content else []
+                        })
+                        
+                    except Exception as e:
+                        print(f"     ❌ Failed: {str(e)}")
+                        results.append({
+                            "tool_name": tool_name,
+                            "parameters": sample_params,
+                            "success": False,
+                            "error": str(e)
+                        })
+                
+                # Save results
+                _save_results(results, output_file)
+                
+                # Summary
+                successful_calls = sum(1 for r in results if r["success"])
+                failed_calls = len(results) - successful_calls
+                print(f"\n📊 Test Summary:")
+                print(f"   Total tools: {len(results)}")
+                print(f"   Successful: {successful_calls}")
+                print(f"   Failed: {failed_calls}")
+                    
+    except Exception as e:
+        print(f"  ❌ Transport test failed: {str(e)}")
+        logger.error(f"Transport test failed: {e}")
+
+
 async def main():
     """Main function to run the MCP client."""
     args = _parse_arguments()
     
     try:
-        # Create FastMCP client
-        client = _get_client(
-            transport=args.transport,
-            server_url=args.server_url,
-            server_command=args.server_command,
-            server_args=args.server_args
-        )
-        
-        async with client:
-            logger.info("Connected to MCP server")
-            
-            # List and display tools as JSON
-            await _list_tools(client)
-            
-            # List available tools
-            tools = await _list_available_tools(client)
-            
-            if not tools:
-                logger.warning("No tools available on the server")
-                return
-            
-            # Test all tools
-            results = await _test_all_tools(client, tools)
-            
-            # Save results
-            _save_results(results, args.output_file)
-            
-            # Summary
-            successful_calls = sum(1 for r in results if r["success"])
-            failed_calls = len(results) - successful_calls
-            
-            logger.info(f"Client execution completed:")
-            logger.info(f"  Total tools tested: {len(results)}")
-            logger.info(f"  Successful calls: {successful_calls}")
-            logger.info(f"  Failed calls: {failed_calls}")
+        logger.info(f"Starting MCP client test with streamable-http transport")
+        await _test_server(args.server_url, args.output_file)
         
     except Exception as e:
         logger.error(f"Client execution failed: {e}")
+        print(f"❌ Client execution failed: {e}")
         raise
 
 
@@ -521,10 +598,15 @@ if __name__ == "__main__":
 
 <instructions>
 Generate a complete MCP client that:
-1. Imports all necessary dependencies (os, json, asyncio, logging, argparse, typing, mcp client libraries, pydantic)
+1. Imports all necessary dependencies (os, json, asyncio, logging, argparse, typing) and MUST include these exact MCP imports:
+   - from mcp import ClientSession
+   - from mcp.client.streamable_http import streamablehttp_client
 2. Sets up logging using the required format exactly as shown in the example
 3. Includes argument parsing for server connection details with proper defaults from environment variables
-4. Connects to the MCP server using SSE transport by default (with stdio as fallback option)
+4. Connects to the MCP server using streamable-http transport following this exact pattern:
+   async with streamablehttp_client(url=server_url) as (read, write, get_session_id):
+       async with ClientSession(read, write) as session:
+           await session.initialize()
 5. Lists all available tools from the server and logs their details
 6. For each tool in the tool specifications, calls it with appropriate parameters based on the schema
 7. Generates realistic sample parameters for each tool based on their input schemas
@@ -570,6 +652,12 @@ Results Management:
 - Log progress and results for easy monitoring
 
 Based on the tool specifications provided, customize the parameter generation and tool calling logic to match the specific tools available on the target MCP server. The client should be able to thoroughly test all functionality exposed by the server.
+
+CRITICAL IMPORT REQUIREMENTS:
+- MUST use the exact imports shown above: from mcp import ClientSession and from mcp.client.streamable_http import streamablehttp_client
+- Use ONLY streamable-http transport, do not include SSE transport code
+- Use the modern MCP SDK imports, not deprecated fastmcp imports
+- The client validation will check for proper import statements
 </instructions>
 
 Please provide only the Python code without any markdown formatting or additional explanation. 

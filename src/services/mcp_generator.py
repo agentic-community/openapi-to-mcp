@@ -435,6 +435,24 @@ class MCPServerGenerator:
             raw_response = response.text
             logger.info(f"Received response from LLM: {len(raw_response)} characters")
             
+            # Debug: Log first 500 characters of LLM response
+            logger.info(f"LLM response preview: {raw_response[:500]}...")
+            
+            # Debug: Check for key patterns in the response
+            key_patterns = [
+                'from mcp.server.fastmcp import FastMCP',
+                'from fastmcp import FastMCP',
+                'FastMCP(',
+                '@mcp.tool()',
+                'def main():'
+            ]
+            
+            for pattern in key_patterns:
+                if pattern in raw_response:
+                    logger.info(f"✓ Found pattern: {pattern}")
+                else:
+                    logger.info(f"✗ Missing pattern: {pattern}")
+            
             # Track and log usage information for MCP server generation
             if response.usage:
                 server_usage.update({
@@ -452,9 +470,14 @@ class MCPServerGenerator:
             
             # Extract Python code from response
             generated_code = self._extract_python_code(raw_response)
+            logger.info(f"Extracted code length: {len(generated_code)} characters")
+            
+            # Debug: Log first 500 characters of extracted code
+            logger.info(f"Extracted code preview: {generated_code[:500]}...")
             
             # Validate the generated code has basic structure
             if not self._validate_generated_code(generated_code):
+                logger.error(f"Validation failed. Full extracted code: {generated_code}")
                 raise ValueError("Generated code failed basic validation")
             
             logger.info("Successfully generated and validated MCP server code using LLM")
@@ -491,7 +514,7 @@ class MCPServerGenerator:
     def _validate_generated_code(self, code: str) -> bool:
         """Basic validation of generated MCP server code."""
         required_patterns = [
-            'from fastmcp import FastMCP',
+            'from mcp.server.fastmcp import FastMCP',
             'FastMCP(',
             '@mcp.tool()',
             'def main():',
@@ -827,7 +850,8 @@ Generate clean Python code with proper imports, logging, and error handling."""
         required_patterns = [
             'import asyncio',
             'import logging',
-            'from fastmcp import Client',
+            'from mcp import ClientSession',
+            'from mcp.client.streamable_http import streamablehttp_client',
             'async def main():',
             'if __name__ == "__main__":'
         ]
@@ -852,7 +876,8 @@ import asyncio
 import logging
 import argparse
 from typing import Any, Dict, List, Optional
-from fastmcp import Client
+from mcp import ClientSession
+from mcp.client.streamable_http import streamablehttp_client
 
 # Configure logging
 logging.basicConfig(
@@ -869,16 +894,8 @@ def _parse_arguments():
     parser.add_argument(
         "--server-url",
         type=str,
-        default=os.environ.get("MCP_SERVER_URL", "http://localhost:9000/sse"),
-        help="URL of the MCP server SSE endpoint (default: http://localhost:9000/sse)",
-    )
-    
-    parser.add_argument(
-        "--transport",
-        type=str,
-        choices=["sse", "stdio"],
-        default="sse",
-        help="Transport method to use (default: sse)",
+        default=os.environ.get("MCP_SERVER_URL", "http://localhost:8000/api"),
+        help="URL of the MCP server endpoint (default: http://localhost:8000/api)",
     )
     
     parser.add_argument(
@@ -891,63 +908,39 @@ def _parse_arguments():
     return parser.parse_args()
 
 
-def _get_client(transport: str, server_url: Optional[str] = None):
-     """Create FastMCP client for the specified transport method."""
-     try:
-         if transport == "sse":
-             if not server_url:
-                 raise ValueError("server_url is required for SSE transport")
-             
-             logger.info(f"Creating FastMCP client for SSE: {{server_url}}")
-             return Client(server_url)
-         else:
-             raise ValueError(f"Fallback client only supports SSE transport")
-         
-     except Exception as e:
-         logger.error(f"Failed to create client: {{e}}")
-         raise
-
-
 async def main():
-     """Main function to run the MCP client."""
-     args = _parse_arguments()
-     
-     try:
-         client = _get_client(args.transport, args.server_url)
-         
-         async with client:
-             logger.info("Connected to MCP server")
-             
-             # List available tools
-             tools_response = await client.list_tools()
-             
-             # Handle different FastMCP API response formats
-             if hasattr(tools_response, 'tools'):
-                 tools = tools_response.tools
-             elif isinstance(tools_response, list):
-                 tools = tools_response
-             else:
-                 tools = []
-             
-             logger.info(f"Found {{len(tools)}} available tools")
-             for tool in tools:
-                 # Handle different tool object formats
-                 if hasattr(tool, 'name'):
-                     name = tool.name
-                     description = getattr(tool, 'description', 'No description')
-                 elif isinstance(tool, dict):
-                     name = tool.get('name', 'Unknown')
-                     description = tool.get('description', 'No description')
-                 else:
-                     name = str(tool)
-                     description = 'No description'
-                 logger.info(f"Tool: {{name}} - {{description}}")
-             
-             print("Fallback client - basic tool listing completed")
-         
-     except Exception as e:
-         logger.error(f"Client execution failed: {{e}}")
-         raise
+    """Main function to run the MCP client."""
+    args = _parse_arguments()
+    
+    try:
+        logger.info("Starting MCP client test with streamable-http transport")
+        print(f"Connecting to: {{args.server_url}}")
+        
+        async with streamablehttp_client(url=args.server_url) as (read, write, get_session_id):
+            print("StreamableHTTP connection established")
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                print("Session initialized successfully")
+                
+                # List available tools
+                tools_response = await session.list_tools()
+                tools = tools_response.tools
+                
+                logger.info(f"Found {{len(tools)}} available tools")
+                print(f"Available tools: {{len(tools)}}")
+                
+                for tool in tools:
+                    name = tool.name
+                    description = getattr(tool, 'description', 'No description')
+                    logger.info(f"Tool: {{name}} - {{description}}")
+                    print(f"  - {{name}}: {{description}}")
+                
+                print("Fallback client - basic tool listing completed")
+        
+    except Exception as e:
+        logger.error(f"Client execution failed: {{e}}")
+        print(f"Error: {{e}}")
+        raise
 
 
 if __name__ == "__main__":

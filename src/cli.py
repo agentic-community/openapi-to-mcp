@@ -267,7 +267,7 @@ def _save_summary_file(
             f.write(f"> **Generated for developers** - This report provides a comprehensive analysis of your OpenAPI specification\n\n")
             
             # Basic Information
-            f.write(f"## 📋 Basic Information\n\n")
+            f.write(f"## Basic Information\n\n")
             f.write(f"| Field | Value |\n")
             f.write(f"|-------|-------|\n")
             f.write(f"| **API Title** | {evaluation.api_title} |\n")
@@ -279,16 +279,16 @@ def _save_summary_file(
             f.write(f"| **Provider** | {output_config.provider_name} |\n\n")
             
             # Overall Scores
-            f.write(f"## 🎯 Overall Scores\n\n")
+            f.write(f"## Overall Scores\n\n")
             f.write(f"| Metric | Score | Status |\n")
             f.write(f"|--------|-------|--------|\n")
-            f.write(f"| **Overall Quality** | {evaluation.overall.overall_quality.value.upper()} | {'✅' if evaluation.overall.overall_quality.value.upper() in ['GOOD', 'EXCELLENT'] else '⚠️'} |\n")
-            f.write(f"| **Completeness Score** | {evaluation.overall.completeness_score}/5 | {'✅' if evaluation.overall.completeness_score >= 3 else '❌'} |\n")
-            f.write(f"| **AI Readiness Score** | {evaluation.overall.ai_readiness_score}/5 | {'✅' if evaluation.overall.ai_readiness_score >= 3 else '❌'} |\n")
-            f.write(f"| **MCP Generation Ready** | {'Yes' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'No'} | {'✅' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else '❌'} |\n\n")
+            f.write(f"| **Overall Quality** | {evaluation.overall.overall_quality.value.upper()} | {'Pass' if evaluation.overall.overall_quality.value.upper() in ['GOOD', 'EXCELLENT'] else 'Warning'} |\n")
+            f.write(f"| **Completeness Score** | {evaluation.overall.completeness_score}/5 | {'Pass' if evaluation.overall.completeness_score >= 3 else 'Fail'} |\n")
+            f.write(f"| **AI Readiness Score** | {evaluation.overall.ai_readiness_score}/5 | {'Pass' if evaluation.overall.ai_readiness_score >= 3 else 'Fail'} |\n")
+            f.write(f"| **MCP Generation Ready** | {'Yes' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'No'} | {'Pass' if evaluation.overall.completeness_score >= 3 and evaluation.overall.ai_readiness_score >= 3 else 'Fail'} |\n\n")
             
             # Usage and Cost Information (Evaluation Only)
-            f.write(f"## 💰 Evaluation Usage & Cost Information\n\n")
+            f.write(f"## Evaluation Usage & Cost Information\n\n")
             
             # Get evaluation usage information only
             eval_usage = getattr(evaluation, 'evaluation_usage', {})
@@ -326,26 +326,26 @@ def _save_summary_file(
             
             # API Information
             if hasattr(evaluation, 'api_info') and evaluation.api_info:
-                f.write(f"## 📚 API Information Analysis\n\n")
+                f.write(f"## API Information Analysis\n\n")
                 info = evaluation.api_info
                 f.write(f"| Component | Status | Notes |\n")
                 f.write(f"|-----------|--------|\n")
-                f.write(f"| **Title** | {'✅ Present' if info.has_title else '❌ Missing'} | Clear and descriptive API name |\n")
-                f.write(f"| **Description** | {'✅ Present' if info.has_description else '❌ Missing'} | Comprehensive overview of API purpose |\n")
-                f.write(f"| **Version** | {'✅ Present' if info.has_version else '❌ Missing'} | Proper API versioning |\n")
-                f.write(f"| **Contact Info** | {'✅ Present' if info.has_contact else '⚠️ Missing'} | Contact details for support |\n")
-                f.write(f"| **License** | {'✅ Present' if info.has_license else '⚠️ Missing'} | License information |\n")
-                f.write(f"| **Terms of Service** | {'✅ Present' if info.has_terms_of_service else '⚠️ Missing'} | Legal terms |\n\n")
+                f.write(f"| **Title** | {'Present' if info.has_title else 'Missing'} | Clear and descriptive API name |\n")
+                f.write(f"| **Description** | {'Present' if info.has_description else 'Missing'} | Comprehensive overview of API purpose |\n")
+                f.write(f"| **Version** | {'Present' if info.has_version else 'Missing'} | Proper API versioning |\n")
+                f.write(f"| **Contact Info** | {'Present' if info.has_contact else 'Missing'} | Contact details for support |\n")
+                f.write(f"| **License** | {'Present' if info.has_license else 'Missing'} | License information |\n")
+                f.write(f"| **Terms of Service** | {'Present' if info.has_terms_of_service else 'Missing'} | Legal terms |\n\n")
                 
                 if info.suggestions:
-                    f.write(f"### 💡 API Info Suggestions\n\n")
+                    f.write(f"### API Info Suggestions\n\n")
                     for suggestion in info.suggestions:
                         f.write(f"- {suggestion}\n")
                     f.write("\n")
             
             # Security Analysis
             if hasattr(evaluation, 'security_schemes') and evaluation.security_schemes:
-                f.write(f"## 🔒 Security Analysis\n\n")
+                f.write(f"## Security Analysis\n\n")
                 f.write(f"**Total Security Schemes**: {len(evaluation.security_schemes)}\n\n")
                 for scheme in evaluation.security_schemes:
                     f.write(f"### {scheme.name}\n")
@@ -355,7 +355,7 @@ def _save_summary_file(
             
             # Operations Analysis
             if hasattr(evaluation, 'operations') and evaluation.operations:
-                f.write(f"## 🔧 Operations Analysis\n\n")
+                f.write(f"## Operations Analysis\n\n")
                 f.write(f"**Total Operations**: {len(evaluation.operations)}\n\n")
                 
                 # Summary table
@@ -364,9 +364,9 @@ def _save_summary_file(
                 f.write(f"|-----------|--------|------|--------------------|-----------------------|----------------------|\n")
                 
                 for op in evaluation.operations:
-                    desc_icon = '✅' if op.description_quality == 'excellent' else '⚠️' if op.description_quality == 'good' else '❌'
-                    param_icon = '✅' if op.parameter_completeness == 'excellent' else '⚠️' if op.parameter_completeness == 'good' else '❌'
-                    resp_icon = '✅' if op.response_completeness == 'excellent' else '⚠️' if op.response_completeness == 'good' else '❌'
+                    desc_icon = 'Excellent' if op.description_quality == 'excellent' else 'Good' if op.description_quality == 'good' else 'Poor'
+                    param_icon = 'Excellent' if op.parameter_completeness == 'excellent' else 'Good' if op.parameter_completeness == 'good' else 'Poor'
+                    resp_icon = 'Excellent' if op.response_completeness == 'excellent' else 'Good' if op.response_completeness == 'good' else 'Poor'
                     f.write(f"| `{op.operation_id}` | {op.method} | `{op.path}` | {desc_icon} {op.description_quality} | {param_icon} {op.parameter_completeness} | {resp_icon} {op.response_completeness} |\n")
                 
                 f.write("\n### Detailed Operation Analysis\n\n")
@@ -384,13 +384,13 @@ def _save_summary_file(
                             if hasattr(param, 'description_quality'):
                                 f.write(f" - Quality: {param.description_quality}")
                             if hasattr(param, 'example_provided'):
-                                f.write(f", Example: {'✅' if param.example_provided else '❌'}")
+                                f.write(f", Example: {'Yes' if param.example_provided else 'No'}")
                             if hasattr(param, 'constraints_defined'):
-                                f.write(f", Constraints: {'✅' if param.constraints_defined else '❌'}")
+                                f.write(f", Constraints: {'Yes' if param.constraints_defined else 'No'}")
                             f.write("\n")
                             if hasattr(param, 'suggestions') and param.suggestions:
                                 for suggestion in param.suggestions:
-                                    f.write(f"  - 💡 {suggestion}\n")
+                                    f.write(f"  - Suggestion: {suggestion}\n")
                     
                     # Responses
                     if op.responses:
@@ -398,20 +398,20 @@ def _save_summary_file(
                         for resp in op.responses:
                             f.write(f"- `{resp.status_code}` - Quality: {resp.description_quality}")
                             if hasattr(resp, 'schema_provided'):
-                                f.write(f", Schema: {'✅' if resp.schema_provided else '❌'}")
+                                f.write(f", Schema: {'Yes' if resp.schema_provided else 'No'}")
                             if hasattr(resp, 'examples_provided'):
-                                f.write(f", Examples: {'✅' if resp.examples_provided else '❌'}")
+                                f.write(f", Examples: {'Yes' if resp.examples_provided else 'No'}")
                             f.write("\n")
                     
                     # Missing items
                     if op.missing_parameters:
-                        f.write(f"\n**⚠️ Missing Parameters**: {', '.join(op.missing_parameters)}\n")
+                        f.write(f"\n**Missing Parameters**: {', '.join(op.missing_parameters)}\n")
                     if op.missing_responses:
-                        f.write(f"\n**⚠️ Missing Response Codes**: {', '.join(op.missing_responses)}\n")
+                        f.write(f"\n**Missing Response Codes**: {', '.join(op.missing_responses)}\n")
                     
                     # Enhancement suggestions
                     if op.enhancement_suggestions:
-                        f.write(f"\n**💡 Enhancement Suggestions**:\n")
+                        f.write(f"\n**Enhancement Suggestions**:\n")
                         for suggestion in op.enhancement_suggestions:
                             f.write(f"- {suggestion}\n")
                     
@@ -419,7 +419,7 @@ def _save_summary_file(
             
             # Schema Analysis
             if hasattr(evaluation, 'schemas') and evaluation.schemas:
-                f.write(f"## 📊 Schema Analysis\n\n")
+                f.write(f"## Schema Analysis\n\n")
                 f.write(f"**Total Schemas**: {len(evaluation.schemas)}\n\n")
                 
                 # Summary table
@@ -432,7 +432,7 @@ def _save_summary_file(
                     has_description = getattr(schema, 'has_description', getattr(schema, 'description_quality', 'N/A') != 'N/A')
                     has_examples = getattr(schema, 'has_examples', getattr(schema, 'examples_provided', False))
                     required_count = len(getattr(schema, 'required_fields', [])) if hasattr(schema, 'required_fields') else 'N/A'
-                    f.write(f"| `{schema_name}` | {completeness} | {'✅' if has_description else '❌'} | {'✅' if has_examples else '❌'} | {required_count} |\n")
+                    f.write(f"| `{schema_name}` | {completeness} | {'Yes' if has_description else 'No'} | {'Yes' if has_examples else 'No'} | {required_count} |\n")
                 
                 f.write("\n### Schema Details\n\n")
                 for schema in evaluation.schemas:
@@ -455,22 +455,22 @@ def _save_summary_file(
                     if hasattr(schema, 'description_quality'):
                         f.write(f"- **Description Quality**: {schema.description_quality}\n")
                     if hasattr(schema, 'properties_documented'):
-                        f.write(f"- **Properties Documented**: {'✅ Yes' if schema.properties_documented else '❌ No'}\n")
+                        f.write(f"- **Properties Documented**: {'Yes' if schema.properties_documented else 'No'}\n")
                     if hasattr(schema, 'required_fields_specified'):
-                        f.write(f"- **Required Fields Specified**: {'✅ Yes' if schema.required_fields_specified else '❌ No'}\n")
+                        f.write(f"- **Required Fields Specified**: {'Yes' if schema.required_fields_specified else 'No'}\n")
                     
                     f.write("\n")
             
             # Linting Results
             if hasattr(evaluation, 'linting') and evaluation.linting:
-                f.write(f"## 🔍 Linting Results\n\n")
+                f.write(f"## Linting Results\n\n")
                 f.write(f"**Linting Score**: {evaluation.linting.linting_score}/5\n\n")
                 f.write(f"| Severity | Count | Description |\n")
                 f.write(f"|----------|-------|-------------|\n")
-                f.write(f"| 🔴 Critical | {evaluation.linting.critical_issues} | Must fix - blocks functionality |\n")
-                f.write(f"| 🟠 Major | {evaluation.linting.major_issues} | Should fix - impacts usability |\n")
-                f.write(f"| 🟡 Minor | {evaluation.linting.minor_issues} | Nice to fix - improves quality |\n")
-                f.write(f"| ℹ️ Info | {evaluation.linting.info_issues} | Suggestions - best practices |\n")
+                f.write(f"| Critical | {evaluation.linting.critical_issues} | Must fix - blocks functionality |\n")
+                f.write(f"| Major | {evaluation.linting.major_issues} | Should fix - impacts usability |\n")
+                f.write(f"| Minor | {evaluation.linting.minor_issues} | Nice to fix - improves quality |\n")
+                f.write(f"| Info | {evaluation.linting.info_issues} | Suggestions - best practices |\n")
                 f.write(f"| **Total** | **{evaluation.linting.total_issues}** | |\n\n")
                 
                 if hasattr(evaluation.linting, 'issues') and evaluation.linting.issues:
@@ -484,7 +484,7 @@ def _save_summary_file(
                     suggestion_issues = [i for i in evaluation.linting.issues if getattr(i, 'severity', None) == 'suggestion']
                     
                     if critical_issues:
-                        f.write(f"#### 🔴 Critical Issues\n\n")
+                        f.write(f"#### Critical Issues\n\n")
                         for issue in critical_issues:
                             rule = getattr(issue, 'rule', 'Unknown')
                             message = getattr(issue, 'message', 'No message')
@@ -496,11 +496,11 @@ def _save_summary_file(
                                 f.write(f" (at `{path}`)")
                             f.write("\n")
                             if suggestion:
-                                f.write(f"  - 💡 {suggestion}\n")
+                                f.write(f"  - Suggestion: {suggestion}\n")
                         f.write("\n")
                     
                     if major_issues:
-                        f.write(f"#### 🟠 Major Issues\n\n")
+                        f.write(f"#### Major Issues\n\n")
                         for issue in major_issues:
                             rule = getattr(issue, 'rule', 'Unknown')
                             message = getattr(issue, 'message', 'No message')
@@ -512,11 +512,11 @@ def _save_summary_file(
                                 f.write(f" (at `{path}`)")
                             f.write("\n")
                             if suggestion:
-                                f.write(f"  - 💡 {suggestion}\n")
+                                f.write(f"  - Suggestion: {suggestion}\n")
                         f.write("\n")
                     
                     if minor_issues:
-                        f.write(f"#### 🟡 Minor Issues\n\n")
+                        f.write(f"#### Minor Issues\n\n")
                         for issue in minor_issues:
                             rule = getattr(issue, 'rule', 'Unknown')
                             message = getattr(issue, 'message', 'No message')
@@ -529,7 +529,7 @@ def _save_summary_file(
                         f.write("\n")
                     
                     if suggestion_issues:
-                        f.write(f"#### 💡 Suggestions\n\n")
+                        f.write(f"#### Suggestions\n\n")
                         for issue in suggestion_issues:
                             rule = getattr(issue, 'rule', 'Unknown')
                             message = getattr(issue, 'message', 'No message')
@@ -542,28 +542,28 @@ def _save_summary_file(
                         f.write("\n")
             
             # Key Strengths and Improvements
-            f.write(f"## 💪 Key Strengths\n\n")
+            f.write(f"## Key Strengths\n\n")
             if evaluation.overall.key_strengths:
                 for strength in evaluation.overall.key_strengths:
-                    f.write(f"- ✅ {strength}\n")
+                    f.write(f"- {strength}\n")
             else:
                 f.write(f"*No specific strengths identified*\n")
             
-            f.write(f"\n## 🎯 Areas for Improvement\n\n")
+            f.write(f"\n## Areas for Improvement\n\n")
             if evaluation.overall.areas_for_improvement:
                 for improvement in evaluation.overall.areas_for_improvement:
-                    f.write(f"- ⚠️ {improvement}\n")
+                    f.write(f"- {improvement}\n")
             else:
                 f.write(f"*No specific improvements identified*\n")
             
             # Recommendations
             if evaluation.overall.recommendations:
-                f.write(f"\n## 📝 Recommendations\n\n")
+                f.write(f"\n## Recommendations\n\n")
                 for i, recommendation in enumerate(evaluation.overall.recommendations, 1):
                     f.write(f"{i}. {recommendation}\n")
             
             # Summary
-            f.write(f"\n## 🎬 Summary\n\n")
+            f.write(f"\n## Summary\n\n")
             if hasattr(evaluation.overall, 'summary') and evaluation.overall.summary:
                 f.write(f"{evaluation.overall.summary}\n")
             else:
@@ -573,10 +573,10 @@ def _save_summary_file(
                 f.write(f"AI readiness score of **{evaluation.overall.ai_readiness_score}/5**. ")
                 
                 if mcp_ready:
-                    f.write(f"\n\n✅ **The specification meets the criteria for MCP server generation.**")
+                    f.write(f"\n\n**The specification meets the criteria for MCP server generation.**")
                 else:
-                    f.write(f"\n\n❌ **The specification does not yet meet the criteria for MCP server generation.** ")
-                    f.write(f"Both completeness and AI readiness scores must be ≥3.")
+                    f.write(f"\n\n**The specification does not yet meet the criteria for MCP server generation.** ")
+                    f.write(f"Both completeness and AI readiness scores must be >=3.")
             
             # Footer
             f.write(f"\n\n---\n")

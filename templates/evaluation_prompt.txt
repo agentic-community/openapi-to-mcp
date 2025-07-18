@@ -34,6 +34,8 @@ For each endpoint, evaluate:
 - **Example Completeness**: Enough examples for AI to generate proper requests
 - **Error Context**: Clear error handling for AI debugging
 - **Operational Clarity**: Unambiguous operation descriptions
+- **List Operations Optimization**: APIs returning lists should include pagination parameters (limit, offset, page) and filtering capabilities
+- **Data Volume Management**: Operations returning multiple items must provide mechanisms to control result size and filter results
 </evaluation_criteria>
 
 <output_format>
@@ -88,6 +90,11 @@ Provide your evaluation as a JSON object.
       ],
       "missing_parameters": ["suggested missing parameters"],
       "missing_responses": ["suggested missing response codes"],
+      "returns_list": true/false,
+      "has_pagination": true/false,
+      "has_filtering": true/false,
+      "pagination_readiness": "excellent|good|fair|poor|not_applicable",
+      "filtering_readiness": "excellent|good|fair|poor|not_applicable",
       "enhancement_suggestions": ["general enhancement suggestions"]
     }
   ],
@@ -109,6 +116,9 @@ Provide your evaluation as a JSON object.
     "has_good_examples": true/false,
     "has_proper_error_handling": true/false,
     "security_well_defined": true/false,
+    "list_operations_optimized": true/false,
+    "pagination_support_adequate": true/false,
+    "filtering_support_adequate": true/false,
     "major_improvements_needed": ["list of major improvements"],
     "minor_improvements_suggested": ["list of minor improvements"]
   },
@@ -131,11 +141,16 @@ Provide your evaluation as a JSON object.
 - **1 (Worst)**: Very incomplete documentation, major elements missing
 
 ### AI Readiness Score (1-5 Likert Scale)
-- **5 (Excellent)**: Perfect for AI consumption - rich context, examples, clear descriptions, unambiguous operations
-- **4 (Good)**: Good AI readiness with minor areas for improvement
-- **3 (Fair)**: Adequate for AI but missing some context or examples
-- **2 (Poor)**: Limited AI readiness, lacks sufficient context or examples
-- **1 (Worst)**: Poor AI readiness, ambiguous descriptions, no examples
+- **5 (Excellent)**: Perfect for AI consumption - rich context, examples, clear descriptions, unambiguous operations, list endpoints include pagination and filtering
+- **4 (Good)**: Good AI readiness with minor areas for improvement, most list operations have pagination/filtering
+- **3 (Fair)**: Adequate for AI but missing some context, examples, or pagination/filtering on list operations
+- **2 (Poor)**: Limited AI readiness, lacks sufficient context, examples, or data volume management for list operations
+- **1 (Worst)**: Poor AI readiness, ambiguous descriptions, no examples, list operations without pagination/filtering controls
+
+**Special Considerations for List Operations:**
+- APIs returning arrays/lists without pagination parameters should reduce AI readiness score
+- Missing filtering capabilities on endpoints returning multiple items should impact the score
+- Uncontrolled data volume responses make APIs unsuitable for AI consumption
 </scoring_guidelines>
 
 
@@ -148,6 +163,12 @@ Provide your evaluation as a JSON object.
 3. **Prioritize Issues**: Distinguish between critical missing elements and nice-to-have improvements
 4. **Provide Examples**: When suggesting improvements, provide specific examples where helpful
 5. **Consider Real-World Usage**: Think about practical API consumption scenarios
+6. **Evaluate List Operations**: For endpoints returning arrays/lists, check for:
+   - Pagination parameters (limit, offset, page, size)
+   - Filtering parameters (where, filter, search)
+   - Sorting parameters (sort, order_by)
+   - Total count information in responses
+7. **Assess Data Volume Impact**: Consider whether unlimited result sets would overwhelm AI systems
 </guidelines>
 
 <response_format_instructions>

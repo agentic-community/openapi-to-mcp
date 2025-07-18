@@ -5,23 +5,26 @@ Generate a complete MCP server implementation in Python that provides tools for 
 </task>
 
 <requirements>
-1. Use the FastMCP framework with proper imports and setup
+1. Use the FastMCP framework (mcp.server.fastmcp.FastMCP) with proper imports and setup
 2. Create one @mcp.tool() function for each API endpoint (path + method combination)
 3. Use proper type annotations with Pydantic Field descriptions
 4. Include comprehensive error handling and logging
 5. Follow the logging configuration format: logging.basicConfig(level=logging.INFO, format="%(asctime)s,p%(process)s,{%(filename)s:%(lineno)d},%(levelname)s,%(message)s")
-6. Include command line argument parsing for host, port, transport, and base-url
-7. Include a system prompt for AI agents using @mcp.prompt()
-8. Include a resource endpoint with @mcp.resource()
-9. Use simple, readable code that avoids clever programming tricks
-10. Include proper docstrings for all functions
-11. Make HTTP requests to the actual API endpoints using the requests library
-12. Handle both path parameters and query parameters properly
-13. Include request body handling for POST/PUT/PATCH operations
-14. Return structured JSON responses from the API calls
-15. Implement authentication headers based on OpenAPI security schemes (Bearer tokens, API keys, etc.)
-16. Use environment variables for API credentials and include authentication in all HTTP requests
-17. Create a reusable helper function for making authenticated API requests
+6. Include command line argument parsing for port and transport (streamable-http by default)
+7. Set up FastMCP server with host="0.0.0.0" and configurable port
+8. Set mount_path for the server (e.g., mcp.settings.mount_path = "/api")
+9. Include a system prompt for AI agents using @mcp.prompt()
+10. Include a resource endpoint with @mcp.resource()
+11. Use simple, readable code that avoids clever programming tricks
+12. Include proper docstrings for all functions
+13. Make HTTP requests to the actual API endpoints using the requests library
+14. Handle both path parameters and query parameters properly
+15. Include request body handling for POST/PUT/PATCH operations
+16. Return structured JSON responses from the API calls
+17. Implement authentication headers based on OpenAPI security schemes (Bearer tokens, API keys, etc.)
+18. Use environment variables for API credentials and include authentication in all HTTP requests
+19. Create a reusable helper function for making authenticated API requests
+20. Use streamable-http transport by default with SSE as fallback option
 </requirements>
 
 <example_mcp_server>
@@ -30,13 +33,11 @@ This server provides an interface to get the current time in a specified timezon
 """
 
 import os
-import time
-import random
 import requests
 import argparse
 import logging
-from fastmcp import FastMCP
-from pydantic import BaseModel, Field
+from mcp.server.fastmcp import FastMCP
+from pydantic import Field
 from typing import Annotated
 
 # Configure logging
@@ -48,27 +49,21 @@ logger = logging.getLogger(__name__)
 
 def parse_arguments():
     """Parse command line arguments with defaults matching environment variables."""
-    parser = argparse.ArgumentParser(description="Current Time MCP Server")
-
-    parser.add_argument(
-        "--host",
-        type=str,
-        default=os.environ.get("MCP_SERVER_HOST", "127.0.0.1"),
-        help="Host for the MCP server to bind to (default: 127.0.0.1)",
-    )
+    parser = argparse.ArgumentParser(description="OpenAPI MCP Server")
 
     parser.add_argument(
         "--port",
         type=str,
-        default=os.environ.get("MCP_SERVER_LISTEN_PORT", "9000"),
-        help="Port for the MCP server to listen on (default: 9000)",
+        default=os.environ.get("MCP_SERVER_LISTEN_PORT", "8000"),
+        help="Port for the MCP server to listen on (default: 8000)",
     )
 
     parser.add_argument(
         "--transport",
         type=str,
-        default=os.environ.get("MCP_TRANSPORT", "sse"),
-        help="Transport type for the MCP server (default: sse)",
+        default=os.environ.get("MCP_TRANSPORT", "streamable-http"),
+        choices=["sse", "streamable-http"],
+        help="Transport type for the MCP server (default: streamable-http)",
     )
 
     parser.add_argument(
@@ -84,8 +79,13 @@ def parse_arguments():
 # Parse arguments at module level to make them available
 args = parse_arguments()
 
+# Log parsed arguments for debugging
+logger.info(f"Parsed arguments - port: {args.port}, transport: {args.transport}")
+logger.info(f"Environment variables - MCP_TRANSPORT: {os.environ.get('MCP_TRANSPORT', 'NOT SET')}, MCP_SERVER_LISTEN_PORT: {os.environ.get('MCP_SERVER_LISTEN_PORT', 'NOT SET')}")
+
 # Initialize FastMCP server
-mcp = FastMCP("CurrentTimeAPI")
+mcp = FastMCP("OpenAPIServer", host="0.0.0.0", port=int(args.port))
+mcp.settings.mount_path = "/api"
 
 def make_api_request(method: str, endpoint: str, params: dict = None, json_data: dict = None) -> dict:
     """Make HTTP request to API endpoint with error handling and authentication."""
@@ -192,11 +192,12 @@ def get_config() -> str:
 
 def main():
     # Run the server with the specified transport from command line args
-    logger.info(f"Starting server on {args.host}:{args.port}")
+    logger.info(f"Starting server on 0.0.0.0:{args.port}")
     logger.info(f"Using API base URL: {args.base_url}")
     logger.info(f"Transport: {args.transport}")
+    logger.info(f"Mount path: {mcp.settings.mount_path}")
     logger.info(f"Configuration source: CLI args and environment variables")
-    mcp.run(transport=args.transport, host=args.host, port=int(args.port))
+    mcp.run(transport=args.transport)
 
 
 if __name__ == "__main__":
@@ -209,10 +210,11 @@ if __name__ == "__main__":
 
 <instructions>
 Generate a complete MCP server that:
-1. Imports all necessary dependencies (os, json, logging, argparse, requests, typing, mcp.server.fastmcp, pydantic)
+1. Imports all necessary dependencies (os, json, logging, argparse, requests, typing) and MUST include the exact import: from mcp.server.fastmcp import FastMCP
 2. Sets up logging using the required format exactly as shown in the example
-3. Includes argument parsing for host, port, transport, and base-url with proper defaults from environment variables
-4. Initializes FastMCP with a meaningful server name and proper configuration
+3. Includes argument parsing for port, transport, and base-url with proper defaults from environment variables
+4. Initializes FastMCP with a meaningful server name, host="0.0.0.0", and configurable port
+5. Sets mount_path for the server endpoint
 5. Creates one tool function for each API endpoint in the OpenAPI spec (each path + method combination)
 6. Create a helper function make_api_request() that handles authentication headers and HTTP requests
 7. Each tool should use the helper function to make requests to actual API endpoints
@@ -250,6 +252,11 @@ API Integration:
 - Support different content types as specified in the OpenAPI spec
 
 Make sure the generated code follows all the patterns shown in the example currenttime server while adapting to the specific API defined in the OpenAPI specification.
+
+CRITICAL IMPORT REQUIREMENTS:
+- MUST use the exact import: from mcp.server.fastmcp import FastMCP
+- DO NOT use: from fastmcp import FastMCP (this is outdated)
+- The validation system will check for the correct import statement
 </instructions>
 
 Please provide only the Python code without any markdown formatting or additional explanation.
