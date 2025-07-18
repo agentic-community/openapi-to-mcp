@@ -110,6 +110,16 @@ When your specification meets the quality thresholds, the tool generates a compl
 
 The generated package includes all necessary dependency files, comprehensive documentation with usage instructions, and detailed tool specifications that describe each operation in MCP format. Everything is organized in a clean directory structure, ready for deployment or further customization.
 
+## Example Results & Output Guide
+
+Want to see what the converter produces? Check out our pre-generated example results and comprehensive output guide:
+
+**[Explore Example Results](examples/results/anthropic/sample_api/)** - See real evaluation reports, generated MCP servers, and more from our sample space mission API
+
+**[Read the Results Guide](docs/RESULTS_GUIDE.md)** - Understand every file the converter generates, with links to actual examples
+
+These resources show you exactly what to expect from the conversion process and help you interpret the evaluation scores and generated code.
+
 ## Prerequisites
 
 - Python 3.12 or higher
@@ -402,7 +412,7 @@ output/
 
 The OpenAPI to MCP Converter generates comprehensive evaluation reports and MCP implementations. To help you understand and work with these outputs:
 
-📖 **[View the Results Guide](docs/RESULTS_GUIDE.md)**
+**[View the Results Guide](docs/RESULTS_GUIDE.md)**
 
 This guide explains:
 - What each generated file contains and its purpose
