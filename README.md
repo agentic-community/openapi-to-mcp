@@ -161,20 +161,20 @@ Options:
 
 ### Environment Variables
 
-Configure your LLM provider through environment variables:
+Configure your LLM provider credentials through environment variables:
 
 #### For Amazon Bedrock:
 ```bash
-export MODEL=bedrock/us.anthropic.claude-3-5-sonnet-20241022-v2:0
 export AWS_PROFILE=your-profile-name
 export AWS_REGION=us-east-1
 ```
 
 #### For Anthropic Direct:
 ```bash
-export MODEL=anthropic/claude-3-5-sonnet-20241022
 export ANTHROPIC_API_KEY=your-api-key
 ```
+
+Note: The model selection is configured in `config/config.yml`, not through environment variables.
 
 ## Examples
 
@@ -207,17 +207,21 @@ openapi-to-mcp my-api.yaml --output results/my-api-evaluation.json
 
 ### Configuration File
 
-The tool uses `config/config.yml` for default settings:
+The tool uses `config/config.yml` for all settings including model selection:
 
 ```yaml
-# Model configuration
-model: ${MODEL}
+# Model configuration - specify your model here
+model: bedrock/us.anthropic.claude-3-5-sonnet-20241022-v2:0
+# Or for Anthropic direct:
+# model: anthropic/claude-3-5-sonnet-20241022
+
+# Model parameters
 max_tokens: 8192
 temperature: 0.0
 timeout_seconds: 300
 
 # Evaluation thresholds
-good_evaluation_threshold: 3.5
+good_evaluation_threshold: 3.0
 generate_mcp_threshold: 3.0
 
 # Feature flags
@@ -296,7 +300,7 @@ When using this tool, please follow these security guidelines:
 
 1. **Sensitive Data in OpenAPI Specs**: Ensure that your OpenAPI specifications do not contain sensitive data such as real API keys, passwords, or personally identifiable information (PII) when testing with cloud-based LLM providers.
 
-2. **Use Local Models for Sensitive Data**: If your OpenAPI specifications contain sensitive information, consider using locally hosted LLM models instead of cloud-based providers to maintain data privacy.
+2. **Use Local Models for Sensitive Data**: If your OpenAPI specifications contain sensitive information, consider using locally hosted LLM models instead of third party model providers to maintain data privacy.
 
 3. **Security Testing of Generated Code**: Always thoroughly review and test the generated MCP server code for security vulnerabilities before deploying to production. This includes:
    - Input validation and sanitization
