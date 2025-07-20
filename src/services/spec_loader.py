@@ -44,9 +44,18 @@ async def _fetch_openapi_spec_from_url(url: str) -> str:
             content = response.text
             logger.info(f"Fetched OpenAPI spec from URL: {len(content)} characters")
             return content
+    except httpx.HTTPStatusError as e:
+        error_msg = f"HTTP {e.response.status_code} error fetching URL {url}: {e.response.reason_phrase}"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
+    except httpx.ConnectError as e:
+        error_msg = f"Connection error fetching URL {url}: {e}"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
     except Exception as e:
-        logger.error(f"Failed to fetch OpenAPI spec from URL {url}: {e}")
-        raise
+        error_msg = f"Failed to fetch OpenAPI spec from URL {url}: {e}"
+        logger.error(error_msg)
+        raise FileNotFoundError(error_msg)
 
 
 async def _load_specification(
@@ -54,8 +63,12 @@ async def _load_specification(
     filename: Optional[str]
 ) -> str:
     """Load OpenAPI specification from file or URL."""
-    if args.url:
+    if hasattr(args, 'url') and args.url:
         return await _fetch_openapi_spec_from_url(args.url)
+    elif filename and (filename.startswith('http://') or filename.startswith('https://')):
+        # Handle case where URL was passed as filename argument
+        logger.info(f"Detected URL in filename argument: {filename}")
+        return await _fetch_openapi_spec_from_url(filename)
     else:
         return _load_openapi_spec(filename)
 

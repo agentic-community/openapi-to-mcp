@@ -483,6 +483,11 @@ When using this tool, please follow these security guidelines:
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for information on reporting security vulnerabilities in this project.
 
+## Roadmap
+
+### Large OpenAPI Specification Support
+- Implement path-based batch processing for handling large API specifications that exceed LLM context windows ([#1](https://github.com/agentic-community/openapi-to-mcp/issues/1))
+
 ## License
 
 This project is licensed under the Apache-2.0 License. See [LICENSE](LICENSE) for details.
