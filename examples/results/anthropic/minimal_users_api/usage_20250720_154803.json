@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-07-20T15:48:18.683636",
+  "evaluation_id": "eval-users-api-2024-001",
+  "api_title": "Users API",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "summary": {
+    "total_tokens": 2902,
+    "total_cost_usd": 0.019577999999999998,
+    "total_calls": 1
+  },
+  "detailed_breakdown": {
+    "evaluation": {
+      "prompt_tokens": 1996,
+      "completion_tokens": 906,
+      "total_tokens": 2902,
+      "total_cost_usd": 0.019577999999999998,
+      "calls_count": 1
+    },
+    "mcp_server_generation": null,
+    "mcp_client_generation": null
+  }
+}

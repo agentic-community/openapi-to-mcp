@@ -137,12 +137,36 @@ Both scores must meet the threshold for MCP server generation. If not met, the e
 
 ## Pre-Generated Sample Results
 
+### Successful Conversion Example: Space Mission API
+
 The `examples/results/anthropic/sample_api/` directory contains pre-generated results from evaluating the sample space mission API. This serves as:
-- A reference for what good evaluation results look like
+- A reference for what good evaluation results look like (scores of 4/5 and 5/5)
 - A ready-to-run example for testing the stub server integration
-- A demonstration of the complete conversion process
+- A demonstration of the complete conversion process including MCP generation
 
 To explore these results:
 1. Review the `summary_*.md` file for a high-level overview
 2. Check the `evaluation_*.json` for detailed scoring
 3. Run the pre-generated MCP server with the stub backend (see main README)
+
+### Failed Conversion Example: Minimal Users API
+
+The `examples/results/anthropic/minimal_users_api/` directory demonstrates what happens when an API specification lacks essential documentation. This example shows:
+- **Poor evaluation scores** (1/5 for both completeness and AI readiness)
+- **Why MCP generation was blocked** due to insufficient documentation
+- **Specific improvements needed** to make the API AI-ready
+
+Key issues identified in this minimal spec:
+- No API description or metadata (contact, license)
+- Missing response schemas and examples
+- No pagination parameters for list operations
+- Lack of error response documentation
+- No parameter constraints or descriptions
+
+[View the evaluation summary](../examples/results/anthropic/minimal_users_api/summary_20250720_154803.md) to see how the tool identifies these issues and provides actionable recommendations for improvement.
+
+This example demonstrates the converter's ability to:
+- Identify documentation gaps that would cause AI agents to fail
+- Provide specific, actionable feedback for improvement
+- Prevent generation of unreliable MCP servers from incomplete specs
+- Guide developers toward AI-ready API documentation

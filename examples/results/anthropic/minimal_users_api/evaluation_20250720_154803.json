@@ -1,0 +1,198 @@
+{
+  "evaluation_id": "eval-users-api-2024-001",
+  "original_spec_url": null,
+  "original_spec_filename": null,
+  "evaluation_timestamp": "2025-07-20T15:48:18.683637",
+  "timestamp": "2025-07-20T15:48:18.683636",
+  "model": "anthropic/claude-sonnet-4-20250514",
+  "enhancement_level": "comprehensive",
+  "openapi_version": "3.0.3",
+  "api_title": "Users API",
+  "api_version": "1.0.0",
+  "security_schemes": [],
+  "operations": [
+    {
+      "operation_id": null,
+      "method": "GET",
+      "path": "/users",
+      "summary": "Get users",
+      "description": null,
+      "description_quality": "poor",
+      "parameter_completeness": "missing",
+      "response_completeness": "poor",
+      "parameters": [],
+      "responses": [
+        {
+          "status_code": "200",
+          "description_quality": "poor",
+          "schema_provided": false,
+          "examples_provided": false,
+          "headers_documented": false,
+          "suggestions": [
+            "Add detailed response schema defining user object structure",
+            "Include realistic examples of user data",
+            "Improve description to explain what user data is returned",
+            "Add headers documentation for content-type, pagination info"
+          ]
+        }
+      ],
+      "missing_parameters": [
+        "limit - to control number of users returned",
+        "offset - for pagination",
+        "page - alternative pagination approach",
+        "search - to filter users by name/email",
+        "sort - to specify sorting criteria",
+        "fields - to select specific user fields"
+      ],
+      "missing_responses": [
+        "400 - Bad Request for invalid parameters",
+        "401 - Unauthorized if authentication required",
+        "403 - Forbidden if access restricted",
+        "500 - Internal Server Error"
+      ],
+      "enhancement_suggestions": [
+        "Add comprehensive parameter documentation for pagination and filtering",
+        "Define complete user schema with all properties",
+        "Add operationId for better API tooling support",
+        "Include detailed operation description explaining functionality",
+        "Add request/response examples for better understanding"
+      ]
+    }
+  ],
+  "schemas": [],
+  "overall": {
+    "overall_quality": "poor",
+    "completeness_score": 1,
+    "ai_readiness_score": 1,
+    "has_comprehensive_descriptions": false,
+    "has_good_examples": false,
+    "has_proper_error_handling": false,
+    "security_well_defined": false,
+    "major_improvements_needed": [
+      "Add comprehensive API description explaining purpose and functionality",
+      "Define complete response schemas with user object structure",
+      "Implement pagination parameters (limit, offset) for the users list endpoint",
+      "Add filtering capabilities (search, field filters) for user queries",
+      "Include proper error response documentation (400, 401, 403, 500)",
+      "Add security scheme definition and requirements",
+      "Provide realistic examples for requests and responses",
+      "Add contact information and license details"
+    ],
+    "minor_improvements_suggested": [
+      "Add operationId to operations for better tooling support",
+      "Include response headers documentation",
+      "Add tags for better API organization",
+      "Consider adding sorting parameters for user lists",
+      "Add field selection capability to reduce response size"
+    ],
+    "key_strengths": [],
+    "areas_for_improvement": [],
+    "recommendations": []
+  },
+  "needs_enhancement": true,
+  "enhancement_priority": "critical",
+  "enhanced_openapi_spec": null,
+  "linting_results": {
+    "total_issues": 10,
+    "error_count": 0,
+    "warning_count": 0,
+    "info_count": 4,
+    "suggestion_count": 6,
+    "issues": [
+      {
+        "severity": "suggestion",
+        "rule": "info-recommended",
+        "message": "API description helps users understand the purpose",
+        "path": "$.info.description",
+        "location": null,
+        "suggestion": "Consider adding 'description' to the info section"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "info-recommended",
+        "message": "Contact information helps users get support",
+        "path": "$.info.contact",
+        "location": null,
+        "suggestion": "Consider adding 'contact' to the info section"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "info-recommended",
+        "message": "License information clarifies usage rights",
+        "path": "$.info.license",
+        "location": null,
+        "suggestion": "Consider adding 'license' to the info section"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "server-description-missing",
+        "message": "Server 0 has no description",
+        "path": "$.servers[0].description",
+        "location": null,
+        "suggestion": "Add description to help users understand the server purpose"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "operation-id-missing",
+        "message": "Operation GET /users has no operationId",
+        "path": "$.paths./users.get.operationId",
+        "location": null,
+        "suggestion": "Add operationId for better code generation and tooling support"
+      },
+      {
+        "severity": "info",
+        "rule": "operation-description-missing",
+        "message": "Operation GET /users has no description",
+        "path": "$.paths./users.get.description",
+        "location": null,
+        "suggestion": "Add a detailed description explaining the operation"
+      },
+      {
+        "severity": "suggestion",
+        "rule": "no-error-response",
+        "message": "No error (4xx/5xx) responses defined",
+        "path": "$.paths./users.get.responses",
+        "location": null,
+        "suggestion": "Consider defining common error responses (400, 401, 404, 500)"
+      },
+      {
+        "severity": "info",
+        "rule": "components-missing",
+        "message": "No components section defined",
+        "path": "$.components",
+        "location": null,
+        "suggestion": "Consider using components to reuse schemas, parameters, and responses"
+      },
+      {
+        "severity": "info",
+        "rule": "security-not-defined",
+        "message": "No security schemes or requirements defined",
+        "path": null,
+        "location": null,
+        "suggestion": "Consider adding security if your API requires authentication"
+      },
+      {
+        "severity": "info",
+        "rule": "documentation-quality",
+        "message": "1 operations are missing descriptions",
+        "path": null,
+        "location": null,
+        "suggestion": "Add descriptions to improve API documentation"
+      }
+    ],
+    "linting_score": 3,
+    "linting_summary": "Found 10 issues: 4 info items, 6 suggestions."
+  },
+  "total_tokens": 2902,
+  "total_cost_usd": 0.019577999999999998,
+  "llm_calls_count": 1,
+  "evaluation_usage": {
+    "prompt_tokens": 1996,
+    "completion_tokens": 906,
+    "total_tokens": 2902,
+    "total_cost_usd": 0.019577999999999998,
+    "calls_count": 1
+  },
+  "mcp_server_usage": null,
+  "mcp_client_usage": null
+}

@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Users API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /users:
+    get:
+      summary: Get users
+      responses:
+        '200':
+          description: Success
