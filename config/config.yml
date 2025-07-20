@@ -1,7 +1,8 @@
 # LLM Model Configuration
 #model: bedrock/us.anthropic.claude-3-5-sonnet-20241022-v2:0
-model: anthropic/claude-sonnet-4-20250514 #anthropic/claude-3-7-sonnet-latest
+model: anthropic/claude-sonnet-4-20250514
 # Model Parameters
+# Set max_tokens to 8192 for Amazon Bedrock bedrock/us.anthropic.claude-3-5-sonnet-20241022-v2:0
 max_tokens: 16384
 temperature: 0.1
 timeout_seconds: 300
