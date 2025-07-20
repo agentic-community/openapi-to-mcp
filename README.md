@@ -1,6 +1,6 @@
 # OpenAPI to MCP Converter
 
-[![License](https://img.shields.io/github/license/openapi-to-mcp/openapi-to-mcp)](LICENSE)
+[![License](https://img.shields.io/github/license/agentic-community/openapi-to-mcp)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-green)](https://github.com/modelcontextprotocol)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
@@ -428,7 +428,7 @@ The pre-generated results in `examples/results/anthropic/sample_api/` serve as a
 ### Supported Providers
 
 1. **Amazon Bedrock**
-   - Models: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
+   - Models: Claude 3.5 Sonnet, Claude 4 Sonnet
    - Region support: All AWS regions with Bedrock
    - Pricing: Pay per token via AWS
 
@@ -456,9 +456,65 @@ We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.
 1. Fork the repository
 2. Create a feature branch
 3. Install development dependencies: `uv pip install -e ".[dev]"`
+   - This installs pytest, black, ruff, and other development tools
 4. Make your changes
-5. Run tests: `pytest`
+5. Run tests and code quality checks
 6. Submit a pull request
+
+### Running Tests
+
+```bash
+# Run all tests
+uv run pytest
+
+# Run tests with coverage
+uv run pytest --cov=src --cov-report=html
+
+# Run specific test file
+uv run pytest tests/test_spec_loader.py
+
+# Run tests in verbose mode
+uv run pytest -v
+```
+
+### Code Quality Tools
+
+#### Black (Code Formatting)
+```bash
+# Format all Python files in src directory
+uv run black src
+
+# Check formatting without making changes
+uv run black --check src
+
+# Format specific file
+uv run black src/services/spec_loader.py
+```
+
+#### Ruff (Linting)
+```bash
+# Run linter on src directory
+uv run ruff check src
+
+# Fix auto-fixable issues
+uv run ruff check --fix src
+
+# Check specific file
+uv run ruff check src/services/spec_loader.py
+```
+
+#### Pre-commit Checks
+Run all quality checks before committing:
+```bash
+# Run black formatting
+uv run black src
+
+# Run ruff linting
+uv run ruff check --fix src
+
+# Run tests
+uv run pytest
+```
 
 ## Security
 

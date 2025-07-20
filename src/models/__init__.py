@@ -15,11 +15,11 @@ from .evaluation import (
 
 __all__ = [
     "OpenAPIEvaluationResult",
-    "OverallEvaluation", 
+    "OverallEvaluation",
     "OperationEvaluation",
     "ParameterEvaluation",
     "QualityScore",
     "ResponseEvaluation",
     "SchemaEvaluation",
     "SecurityRequirement",
-] 
+]

@@ -9,10 +9,10 @@ __all__ = [
     # LLM Client (unified via LiteLLM)
     "LLMClient",
     "LLMRequest",
-    "LLMResponse", 
+    "LLMResponse",
     "get_llm_client",
     # OpenAPI Enhancement
     "EnhancementRequest",
     "EnhancementResult",
     "OpenAPIEnhancer",
-] 
+]

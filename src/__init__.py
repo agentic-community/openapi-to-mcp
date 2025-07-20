@@ -10,4 +10,4 @@ __author__ = "OpenAPI to MCP Team"
 __description__ = "Convert OpenAPI specifications to MCP servers with LLM enhancement"
 
 # Make CLI main function available at package level
-__all__ = ["main_cli"] 
+__all__ = ["main_cli"]

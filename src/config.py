@@ -53,14 +53,14 @@ ensure_directories()
 if __name__ == "__main__":
     """Standalone testing of simplified configuration."""
     logger.info("Testing simplified configuration module...")
-    
+
     # Test directory helpers
     logger.info(f"Temp dir: {get_temp_dir()}")
     logger.info(f"Templates dir: {get_templates_dir()}")
     logger.info(f"Output dir: {get_output_dir()}")
-    
+
     # Test config loader access
     logger.info(f"Model from config.yml: {config.get_str('model')}")
     logger.info(f"Max tokens from config.yml: {config.get_int('max_tokens')}")
-    
+
     logger.info("Simplified configuration module test completed successfully")
