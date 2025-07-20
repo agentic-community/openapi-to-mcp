@@ -44,8 +44,6 @@ def _show_environment_info() -> None:
         debug = config.get_bool("debug", False)
 
         templates_dir = config.get_path("templates_dir", "./templates")
-        temp_dir = config.get_path("temp_dir", "./temp")
-        output_dir = config.get_path("output_dir", "./output")
 
         print(f"\n{'='*60}")
         print("🔧 ENVIRONMENT CONFIGURATION")
@@ -63,8 +61,7 @@ def _show_environment_info() -> None:
 
         print("\n📂 DIRECTORIES:")
         print(f"   Templates: {templates_dir}")
-        print(f"   Temp: {temp_dir}")
-        print(f"   Output: {output_dir}")
+        print("   Results: ./results (hardcoded)")
 
         print("\n🔧 CONFIGURATION FILES:")
         config_file = Path("config/config.yml")

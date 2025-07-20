@@ -19,28 +19,23 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_temp_dir() -> Path:
-    """Get the temporary directory path from config."""
-    return config.get_path("temp_dir", "./temp")
-
-
 def get_templates_dir() -> Path:
     """Get the templates directory path from config."""
     return config.get_path("templates_dir", "./templates")
 
 
-def get_output_dir() -> Path:
-    """Get the output directory path from config."""
-    return config.get_path("output_dir", "./output")
-
-
 def ensure_directories() -> None:
     """Ensure all required directories exist."""
     try:
-        directories = [get_temp_dir(), get_templates_dir(), get_output_dir()]
-        for directory in directories:
-            directory.mkdir(parents=True, exist_ok=True)
-            logger.info(f"Ensured directory exists: {directory}")
+        # Only templates directory is needed from config
+        templates_dir = get_templates_dir()
+        templates_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Ensured directory exists: {templates_dir}")
+        
+        # Results directory is hardcoded in OutputConfig
+        results_dir = Path("results")
+        results_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Ensured directory exists: {results_dir}")
     except Exception as e:
         logger.error(f"Failed to create directories: {e}")
         raise
@@ -55,9 +50,8 @@ if __name__ == "__main__":
     logger.info("Testing simplified configuration module...")
 
     # Test directory helpers
-    logger.info(f"Temp dir: {get_temp_dir()}")
     logger.info(f"Templates dir: {get_templates_dir()}")
-    logger.info(f"Output dir: {get_output_dir()}")
+    logger.info(f"Results dir: {Path('results')}")
 
     # Test config loader access
     logger.info(f"Model from config.yml: {config.get_str('model')}")

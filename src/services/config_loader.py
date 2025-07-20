@@ -200,7 +200,7 @@ model: test-model
 max_tokens: 1000
 temperature: 0.5
 debug: true
-temp_dir: ./test_temp
+templates_dir: ./test_templates
         """
         )
 
@@ -244,10 +244,10 @@ temp_dir: ./test_temp
 
     # Test 6: Get path value
     total_tests += 1
-    temp_dir = test_loader.get_path("temp_dir")
-    expected = Path("./test_temp")
-    if temp_dir != expected:
-        all_validation_failures.append(f"get_path: Expected {expected}, got {temp_dir}")
+    templates_dir = test_loader.get_path("templates_dir")
+    expected = Path("./test_templates")
+    if templates_dir != expected:
+        all_validation_failures.append(f"get_path: Expected {expected}, got {templates_dir}")
 
     # Test 7: Get non-existent value with default
     total_tests += 1
